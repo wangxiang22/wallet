@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.AdminBillClassifyMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.AdminBillClassify">
+        <id column="id" property="id" />
+        <result column="bill_name" property="billName" />
+        <result column="show_state" property="showState" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id AS id, bill_name AS billName, show_state AS showState
+    </sql>
+
+
+    <update id="updateShowHide" parameterType="com.xinlian.common.request.BillClassifyShowHideReq">
+        update admin_bill_classify set show_state = #{showState} where id = #{id}
+    </update>
+
+</mapper>

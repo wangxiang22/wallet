@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.CurrencyBalanceHourChangeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.CurrencyBalanceHourChangeModel">
+        <id column="id" property="id" />
+        <result column="currency_id" property="currencyId" />
+        <result column="currency_code" property="currencyCode" />
+        <result column="balance_num" property="balanceNum" />
+        <result column="frozen_num" property="frozenNum" />
+        <result column="createtime" property="createtime" />
+    </resultMap>
+
+    <select id="statisticsCurrencyBalance" resultType="java.lang.Integer">
+        insert into t_currency_balance_hour_change (balance_num,freeze_num,currency_id,currency_code,createtime)
+        select sum(balance_num),sum(frozen_num),
+        #{currencyId},#{currencyCode},CURRENT_TIMESTAMP from t_wallet_info where currency_code = #{currencyCode}
+    </select>
+
+
+
+
+    <select id="getCatBalance" resultType="java.math.BigDecimal">
+        SELECT (`balance_num` + `freeze_num` )   FROM `xinlian_wallet`.`t_currency_balance_hour_change`  WHERE `currency_id` =6 ORDER BY `createtime` DESC  LIMIT 1
+    </select>
+
+    <select id="getOldCatBalance" resultType="java.math.BigDecimal">
+        SELECT (`balance_num` + `freeze_num` )     FROM `xinlian_wallet`.`t_currency_balance_hour_change`  WHERE `currency_id` =6 and UNIX_TIMESTAMP(`createtime`) &lt;= (UNIX_TIMESTAMP(NOW())-86400)  ORDER BY `createtime` DESC  LIMIT 1 ;
+    </select>
+
+    <select id="getCagBalance" resultType="java.math.BigDecimal">
+        SELECT (`balance_num` + `freeze_num` )   FROM `xinlian_wallet`.`t_currency_balance_hour_change`  WHERE `currency_id` =211 ORDER BY `createtime` DESC  LIMIT 1
+    </select>
+
+    <select id="getOldCagBalance" resultType="java.math.BigDecimal">
+        SELECT (`balance_num` + `freeze_num` )     FROM `xinlian_wallet`.`t_currency_balance_hour_change`  WHERE `currency_id` =211 and UNIX_TIMESTAMP(`createtime`)  &lt;= (UNIX_TIMESTAMP(NOW())-86400) ORDER BY `createtime` DESC  LIMIT 1 ;
+    </select>
+
+
+
+</mapper>

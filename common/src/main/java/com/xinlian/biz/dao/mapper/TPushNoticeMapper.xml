@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TPushNoticeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TPushNotice">
+        <id column="id" property="id" />
+        <result column="title" property="title" />
+        <result column="type" property="type" />
+        <result column="push_image" property="pushImage" />
+        <result column="push_text" property="pushText" />
+        <result column="push_url" property="pushUrl" />
+        <result column="close_status" property="closeStatus" />
+        <result column="online_status" property="onlineStatus" />
+        <result column="status" property="status" />
+        <result column="start_time" property="startTime" />
+        <result column="end_time" property="endTime" />
+        <result column="uids" property="uids" />
+        <result column="node_ids" property="nodeIds" />
+        <result column="schedule_id" property="scheduleId" />
+        <result column="unique_code" property="uniqueCode" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, title, type, push_image, push_text, push_url, close_status, online_status, status, start_time, end_time, uids, node_ids, schedule_id, unique_code
+    </sql>
+
+    <insert id="appNoticePushRecord" parameterType="com.xinlian.biz.model.AppNoticePushRecordModel">
+        insert into t_app_notice_push_record
+        (push_title,push_content,push_result,push_uid,push_jid,createtime)
+        values
+        (#{pushTitle},#{pushContent},#{pushResult},#{pushUid},#{pushJid},CURRENT_TIMESTAMP)
+    </insert>
+
+</mapper>

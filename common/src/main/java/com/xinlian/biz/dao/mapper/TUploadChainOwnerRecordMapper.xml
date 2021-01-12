@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TUploadChainOwnerRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TUploadChainOwnerRecord">
+        <id column="id" property="id" />
+        <result column="uid" property="uid" />
+        <result column="node_id" property="nodeId" />
+        <result column="status" property="status" />
+        <result column="email" property="email" />
+        <result column="auth_name" property="authName" />
+        <result column="auth_sn" property="authSn" />
+        <result column="mobile" property="mobile" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, uid, node_id, status, email, auth_name, auth_sn, mobile, create_time, update_time
+    </sql>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        insert into t_upload_chain_owner_record (
+        uid,
+        auth_name,
+        auth_sn,
+        mobile,
+        email,
+        create_time)
+        values
+        <foreach collection="list" item="record" separator=",">
+            ( #{record.uid},
+            #{record.authName},
+            #{record.authSn},
+            #{record.mobile},
+            #{record.email},
+            CURRENT_TIMESTAMP )
+        </foreach>
+    </insert>
+
+    <select id="getWaitDisposeInfo" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from t_upload_chain_owner_record
+        where status = 1
+        limit 1
+    </select>
+
+    <select id="getCoincidentChainOwner" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        ulr.id ,uer.uid,
+        auth.real_name AS userAuthName,
+        auth.auth_sn AS userAuthSn,
+        uer.mobile as userMobile,
+        uer.server_node_id as userNodeId,
+        uer.email as userEmail,
+        ulr.auth_name,
+        ulr.auth_sn,
+        ulr.mobile
+        from
+        t_upload_chain_owner_record ulr
+        left join t_user_info uer on ulr.uid = uer.uid
+        left join t_user_auth auth on uer.uid = auth.uid
+        WHERE ulr.status = 1
+        and orem_state = 1
+        and uer.uid is not null
+        <if test="getLimit!=null">
+            limit #{getLimit}
+        </if>
+    </select>
+
+    <update id="batchUpdate" parameterType="com.xinlian.biz.model.TUploadChainOwnerRecord">
+        update t_upload_chain_owner_record
+        set status = #{newStatus},
+        update_time = CURRENT_TIMESTAMP
+        where status = #{oldStatus}
+        and id in
+        <foreach collection="list" item="record" open="(" close=")" separator=",">
+            #{record.id}
+        </foreach>
+    </update>
+
+    <select id="getExistChainOwners" resultMap="BaseResultMap">
+        SELECT
+            ulr.id
+        FROM
+            t_upload_chain_owner_record ulr
+        left join t_chain_owner own on own.uid = ulr.uid
+        WHERE
+            ulr. STATUS = 1
+        and own.uid is NOT NULL
+    </select>
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xinlian.biz.dao.AdminUserRoleMapper" >
+  <resultMap id="BaseResultMap" type="com.xinlian.biz.model.AdminUserRoleRef" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="user_id" property="userId" jdbcType="VARCHAR" />
+    <result column="role_id" property="roleId" jdbcType="VARCHAR" />
+  </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, role_id
+    </sql>
+    <select id="getById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from admin_user_role
+        where id = #{id}
+    </select>
+    <delete id="delete" parameterType="java.lang.Long">
+        delete from admin_user_role
+        where id = #{id}
+    </delete>
+    <delete id="deleteByRoleId" parameterType="java.lang.Long">
+        delete from admin_user_role
+        where role_id = #{roleId}
+    </delete>
+
+    <insert id="insert" parameterType="com.xinlian.biz.model.AdminUserRoleRef">
+        insert into admin_user_role (user_id, role_id
+        )
+        values ( #{userId}, #{roleId}
+        )
+    </insert>
+    <update id="update" parameterType="com.xinlian.biz.model.AdminUserRoleRef">
+        update admin_user_role
+        <set >
+            <if test="userId != null" >
+                user_id = #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="roleId != null" >
+                role_id = #{roleId,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <update id="updateRoleByUserId" parameterType="com.xinlian.biz.model.AdminUserRoleRef">
+        update admin_user_role
+        set role_id = #{roleId}
+        where user_id = #{userId}
+    </update>
+
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.AdminUpdateVersionInfoMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.AdminUpdateVersionInfo">
+        <id column="id" property="id" />
+        <result column="vid" property="vid" />
+        <result column="time" property="time" />
+        <result column="Issued" property="Issued" />
+        <result column="download" property="download" />
+        <result column="type" property="type" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, vid, time, Issued AS Issued, download, type
+    </sql>
+
+    <update id="updateDownload" >
+       UPDATE `admin_update_version_info` set download=#{download} WHERE  vid=#{vid} and type=#{type} and time=#{time};
+    </update>
+
+</mapper>

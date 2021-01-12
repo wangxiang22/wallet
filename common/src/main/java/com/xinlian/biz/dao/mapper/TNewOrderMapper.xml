@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TNewOrderMapper">
+    <resultMap type="com.xinlian.biz.model.TNewOrder" id="BaseResultMap">
+        <id property="id" column="id"/>
+        <result property="uid" column="uid"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="amount" column="amount"/>
+        <result property="price" column="price"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="address" column="address"/>
+        <result property="phone" column="phone"/>
+        <result property="userName" column="user_name"/>
+        <result property="status" column="status"/>
+        <result property="createTime" column="create_time"/>
+        <result property="sendTime" column="send_time"/>
+        <result property="finishTime" column="finish_time"/>
+        <result property="expressComId" column="express_comId"/>
+        <result property="expressCode" column="express_code"/>
+        <result property="expressName" column="express_name"/>
+        <result property="chainName" column="chain_name"/>
+        <result property="isImport" column="is_import"/>
+
+    </resultMap>
+
+    <select id="queryOrderList" parameterType="com.xinlian.common.request.QueryOrderListReq" resultMap="BaseResultMap">
+        select * from t_new_order
+        <where>
+            <if test="uid != null">
+                AND uid = #{uid}
+            </if>
+            <if test="goodsName != null and goodsName != '' ">
+                AND goods_name like CONCAT('%',#{goodsName}, '%')
+            </if>
+            <if test="minAmount != null">
+                AND amount &gt;= #{minAmount}
+            </if>
+            <if test="maxAmount != null">
+                AND amount &lt;= #{maxAmount}
+            </if>
+            <if test="orderNo != null and orderNo != '' ">
+                AND order_no = #{orderNo}
+            </if>
+            <if test="phone != null and phone != '' ">
+                AND phone = #{phone}
+            </if>
+            <if test="userName != null and userName != '' ">
+                AND user_name = #{userName}
+            </if>
+            <if test="status != null and status != '' ">
+                AND status = #{status}
+            </if>
+            <if test="minCreateTime != null">
+                AND create_time &gt;= #{minCreateTime}
+            </if>
+            <if test="maxCreateTime != null">
+                AND create_time &lt;= #{maxCreateTime}
+            </if>
+            <if test="isImport != null">
+                AND is_import = #{isImport}
+            </if>
+        </where>
+        order by id desc
+        limit #{start},#{pageSize}
+    </select>
+
+    <select id="queryOrderCount" parameterType="com.xinlian.common.request.QueryOrderListReq" resultType="java.lang.Integer">
+        select count(id) from t_new_order
+        <where>
+            <if test="uid != null">
+                AND uid = #{uid}
+            </if>
+            <if test="goodsName != null and goodsName != '' ">
+                AND goods_name = #{goodsName}
+            </if>
+            <if test="minAmount != null">
+                AND amount &gt;= #{minAmount}
+            </if>
+            <if test="maxAmount != null">
+                AND amount &lt;= #{maxAmount}
+            </if>
+            <if test="orderNo != null and orderNo != '' ">
+                AND order_no = #{orderNo}
+            </if>
+            <if test="phone != null and phone != '' ">
+                AND phone = #{phone}
+            </if>
+            <if test="userName != null and userName != '' ">
+                AND user_name = #{userName}
+            </if>
+            <if test="status != null and status != '' ">
+                AND status = #{status}
+            </if>
+            <if test="minCreateTime != null">
+                <![CDATA[
+                and create_time >= #{minCreateTime}
+                ]]>
+            </if>
+            <if test="maxCreateTime != null">
+                <![CDATA[
+                and create_time <= #{maxCreateTime}
+                ]]>
+            </if>
+            <if test="isImport != null">
+                AND is_import = #{isImport}
+            </if>
+        </where>
+    </select>
+    <select id="exportOrders" parameterType="com.xinlian.common.request.OrderExportReq" resultMap="BaseResultMap">
+        select * from t_new_order
+        <where>
+            <if test="minCreateTime != null">
+                <![CDATA[
+                and create_time >= #{minCreateTime}
+                ]]>
+            </if>
+            <if test="maxCreateTime != null">
+                <![CDATA[
+                and create_time <= #{maxCreateTime}
+                ]]>
+            </if>
+            AND is_import =0
+            and status = 0
+        </where>
+        order by id desc
+    </select>
+
+    <update id="updateByIds" parameterType="com.xinlian.biz.model.TNewOrder">
+        update t_new_order set is_import = 1 where uid in <foreach collection="list" index="index" item="item" separator="," open="(" close=")">#{item.uid}</foreach>
+    </update>
+
+    <update id="updateNewOrderById" parameterType="com.xinlian.common.request.UpdateNewOrderReq">
+        update t_new_order
+        <set>
+            <if test="address != null and address != ''">
+                address = #{address},
+            </if>
+            <if test="phone != null and phone != ''">
+                phone = #{phone},
+            </if>
+            <if test="userName != null and userName != ''">
+                user_name = #{userName},
+            </if>
+            <if test="chainName != null and chainName != ''">
+                chain_name = #{chainName},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

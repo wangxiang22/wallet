@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TUserWithdrawAddressRefMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TUserWithdrawAddressRef">
+        <id column="id" property="id" />
+        <result column="uid" property="uid" />
+        <result column="to_currency_id" property="toCurrencyId" />
+        <result column="to_currency_code" property="toCurrencyCode" />
+        <result column="to_currency_address" property="toCurrencyAddress" />
+        <result column="server_node_id" property="serverNodeId" />
+        <result column="create_time" property="createTime" />
+        <result column="is_del" property="isDel" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, uid, to_currency_id, to_currency_code, to_currency_address, server_node_id, create_time, is_del
+    </sql>
+
+    <select id="getByCriteria" resultMap="BaseResultMap" parameterType="com.xinlian.biz.model.TUserWithdrawAddressRef">
+        select <include refid="Base_Column_List"/>
+        from t_user_withdraw_address_ref
+        <include refid="whereSql"/>
+        order by create_time desc limit 1
+    </select>
+
+    <sql id="whereSql">
+        <where>
+            <if test="id!=null and id!=0">
+                and id = #{id}
+            </if>
+            <if test="toCurrencyAddress!=null and toCurrencyAddress!=''">
+                and to_currency_address = #{toCurrencyAddress}
+            </if>
+            <if test="isDel!=null">
+                and is_del =  #{isDel}
+            </if>
+        </where>
+    </sql>
+</mapper>

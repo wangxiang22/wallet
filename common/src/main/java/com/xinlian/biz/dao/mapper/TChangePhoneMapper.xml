@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TChangePhoneMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TChangePhone">
+        <id column="id" property="id" />
+        <result column="uid" property="uid" />
+        <result column="phone" property="phone" />
+        <result column="country_code" property="countryCode" />
+        <result column="real_name" property="realName" />
+        <result column="idcard_no" property="idcardNo" />
+        <result column="idcard_img" property="idcardImg" />
+        <result column="idcard_img1" property="idcardImg1" />
+        <result column="idcard_man" property="idcardMan" />
+        <result column="euid" property="euid" />
+        <result column="editor" property="editor" />
+        <result column="status" property="status" />
+        <result column="remark" property="remark" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, uid, phone, country_code, real_name, idcard_no, idcard_img, idcard_img1, idcard_man, euid, editor, status, remark, create_time, update_time
+    </sql>
+
+</mapper>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.AliYunEmailConfigMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.AliYunEmailConfigModel">
+        <id column="id" property="id" />
+        <result column="email_address" property="emailAddress" />
+        <result column="access_key_id" property="accessKeyId" />
+        <result column="access_secret" property="accessSecret" />
+        <result column="send_domain"   property="sendDomain"/>
+        <result column="send_init_num" property="sendInitNum"/>
+        <result column="status"        property="status"/>
+        <result column="use_sort"      property="useSort"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, email_address, access_key_id, access_secret,
+        send_domain,send_init_num,status,use_sort
+    </sql>
+
+    <select id="nextUseSortEmail" resultMap="BaseResultMap" parameterType="com.xinlian.biz.model.AliYunEmailConfigModel">
+        select <include refid="Base_Column_List"/>
+        from t_aliyun_email_config
+        where status = 1
+        <if test="useSort!=null">
+            and use_sort &gt; #{useSort}
+        </if>
+        order by use_sort asc limit 1
+    </select>
+
+    <insert id="threadSaveEmailLog" parameterType="com.xinlian.biz.model.AliyunEmailLogModel">
+        insert into t_aliyun_email_log
+        (sender_email_address,acceptor_email_address,email_code,use_type,use_type_desc,email_result,createtime)
+        values
+        (#{senderEmailAddress},#{acceptorEmailAddress},#{emailCode},#{useType},#{useTypeDesc},#{emailResult},CURRENT_TIMESTAMP)
+    </insert>
+
+
+</mapper>

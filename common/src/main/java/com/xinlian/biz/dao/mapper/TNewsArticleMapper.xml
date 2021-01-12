@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TNewsArticleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TNewsArticle">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="description" property="description"/>
+        <result column="keywords" property="keywords"/>
+        <result column="content" property="content"/>
+        <result column="url" property="url"/>
+        <result column="thumb" property="thumb"/>
+        <result column="label" property="label"/>
+        <result column="likes" property="likes"/>
+        <result column="top_status" property="topStatus"/>
+        <result column="uid" property="uid"/>
+        <result column="creator" property="creator"/>
+        <result column="input_time" property="inputTime"/>
+        <result column="updator" property="updator"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="hits" property="hits"/>
+        <result column="tid" property="tid"/>
+        <result column="status" property="status"/>
+        <result column="type_language" property="typeLanguage"/>
+        <result column="system_type" property="systemType"/>
+        <result column="uids" property="uidS"/>
+        <result column="out_url" property="outUrl"/>
+
+    </resultMap>
+    <resultMap id="BaseMap" type="com.xinlian.common.response.NewsRes">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="description" property="description"/>
+        <result column="keywords" property="keywords"/>
+        <result column="content" property="content"/>
+        <result column="url" property="url"/>
+        <result column="thumb" property="thumb"/>
+        <result column="label" property="label"/>
+        <result column="likes" property="likes"/>
+        <result column="top_status" property="topStatus"/>
+        <result column="uid" property="uid"/>
+        <result column="creator" property="creator"/>
+        <result column="input_time" property="inputTime"/>
+        <result column="updator" property="updator"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="hits" property="hits"/>
+        <result column="name" property="name"/>
+        <result column="status" property="status"/>
+        <result column="type_language" property="typeLanguage"/>
+        <result column="type_language" property="typeLanguage"/>
+        <result column="uids" property="uidS"/>
+        <result column="out_url" property="outUrl"/>
+    </resultMap>
+
+
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, title, description, keywords, content, url, thumb, label, likes, top_status, uid, creator, input_time, updator, update_time, hits, tid,status,type_language,system_type,uids,out_url
+    </sql>
+
+
+    <select id="queryListForNew" resultMap="BaseResultMap">
+        select id,title,thumb,description,input_time,url,status ,type_language ,out_url ,label from t_news_article where tid=3 and type_language ="EN" ORDER BY input_time desc LIMIT 10
+    </select>
+
+
+    <select id="queryOne" resultMap="BaseResultMap">
+    select id,title, description, keywords, content, url, thumb, label, likes, top_status, uid, creator, input_time, updator, update_time, hits, tid,status,type_language,system_type,uids,out_url from t_news_article where  id=#{id}
+</select>
+
+
+
+    <select id="queryAll" resultMap="BaseMap">
+         select a.id,a.title,a.description,a.keywords,a.content,a.url,a.thumb,a.label,a.likes,a.top_status,a.uid,a.creator,a.input_time,a.updator,a.update_time,a.hits,a.tid,a.status,a.type_language,a.system_type,a.uids,a.out_url,b.`name`
+        from  t_news_article as a
+        LEFT JOIN t_news_type  as b
+        on a.tid=b.id  order by a.input_time desc
+    </select>
+
+
+    <insert id="insertOne" parameterType="com.xinlian.biz.model.TNewsArticle" useGeneratedKeys="true" keyProperty="id">
+        insert into t_news_article (title, description, keywords, content, url, thumb, label, likes, top_status, uid, creator, input_time, updator, update_time, hits, tid,status,type_language,system_type,uids,out_url)
+         values (#{title},#{description},#{keywords},#{content},#{url},#{thumb},#{label},#{likes},#{topStatus},#{uid},#{creator},#{inputTime},#{updator},#{updateTime},#{hits},#{tid},#{status},#{typeLanguage},#{systemType},#{uidS},#{outUrl});
+    </insert>
+
+
+    <select id="searchNewsAllCn" resultMap="BaseResultMap">
+        select id,title, description, keywords, content, url, thumb, label, likes, top_status, uid, creator, input_time, updator, update_time, hits, tid,status,type_language,system_type,uids,out_url from t_news_article where status =1 and type_language="CN" and tid=#{tid} order by top_status desc,input_time desc
+    </select>
+
+    <select id="searchNewsAllEn" resultMap="BaseResultMap">
+        select id,title, description, keywords, content, url, thumb, label, likes, top_status, uid, creator, input_time, updator, update_time, hits, tid,status,type_language,system_type,uids,out_url from t_news_article where status =1 and type_language="EN" and tid=#{tid} order by  top_status desc,input_time desc
+    </select>
+
+
+    <update id="updateHits" parameterType="integer">
+  update t_news_article set hits=ifnull(hits,0)+1 where id=#{id}
+    </update>
+
+
+    <update id="updateLikes" parameterType="long">
+  update t_news_article set likes=#{likes} where id=#{id}
+    </update>
+
+    <select id="searchNews" resultMap="BaseMap">
+        select a.id,a.title,a.description,a.keywords,a.content,a.url,a.thumb,a.label,a.likes,a.top_status,a.uid,a.creator,a.input_time,a.updator,a.update_time,a.hits,a.tid,a.status,a.type_language,a.system_type,a.uids,a.out_url,b.`name`
+        from  t_news_article as a
+        LEFT JOIN t_news_type  as b
+        on a.tid=b.id
+<where>
+    1=1
+    <if test="tid !=null and tid !=''">and a.tid =#{tid}</if>
+    <if test="title !=null and title !=''">and a.title like concat('%',#{title},'%')</if>
+    <if test="startTime !=null and startTime !=''"> and a.input_time <![CDATA[ >= ]]> #{startTime}</if>
+    <if test="endTime !=null and endTime !=''"> and a.input_time <![CDATA[ <= ]]> #{endTime}</if>
+</where>
+order by a.input_time desc
+    </select>
+</mapper>

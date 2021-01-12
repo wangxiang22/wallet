@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.UserBalanceMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.AllCurrencyRes">
+        <result column="cashfee_status" property="cashfeeStatus"/>
+        <result column="cashfee_min" property="cashfeeMin"/>
+        <result column="currency_id" property="currencyId"/>
+        <result column="balance_num" property="balanceNum"/>
+        <result column="cash_fee" property="cashFee"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, uid, currency_id, currency_code, currency_address, balance_num, frozen_num
+    </sql>
+
+    <select id="selectUserBalance" resultMap="BaseResultMap">
+                SELECT
+                w.uid,
+            w.currency_id,
+            w.currency_code as coinname,
+            w.balance_num,
+            c.cash_fee,
+            c.cashfee_min,
+            c.cashfee_status ,
+            c.cash,
+            c.icon,
+            c.dollar,
+            c.recharge,
+            c.dollar * w.balance_num as dollariteam
+        FROM
+            t_wallet_info w
+            JOIN t_currency_manage c ON w.currency_id = c.currency_id
+        WHERE
+            w.uid = #{uid} and c.status=1
+        GROUP BY
+            w.currency_id
+    </select>
+</mapper>

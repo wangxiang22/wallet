@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.THedgeCustomerWalletMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.THedgeCustomerWallet">
+        <id column="id" property="id" />
+        <result column="uid" property="uid" />
+        <result column="hedge_num" property="hedgeNum" />
+        <result column="status" property="status" />
+        <result column="currency_id" property="currencyId" />
+        <result column="currency_code" property="currencyCode" />
+        <result column="ope_type" property="opeType" />
+        <result column="hedge_time" property="hedgeTime" />
+        <result column="stay_unfreeze_time" property="stayUnfreezeTime" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, uid, hedge_num, status, currency_id, currency_code, ope_type, hedge_time, stay_unfreeze_time, create_time, update_time
+    </sql>
+
+
+    <select id="findExpireFreezeUidList" resultType="java.lang.Long">
+        select uid from t_hedge_customer_wallet where status = 0 and stay_unfreeze_time &lt;= CURRENT_TIMESTAMP
+    </select>
+
+    <update id="updateFreezeStatus" parameterType="java.util.List">
+        update t_hedge_customer_wallet
+        set status = 1
+        where uid in <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">#{item}</foreach>
+    </update>
+
+</mapper>

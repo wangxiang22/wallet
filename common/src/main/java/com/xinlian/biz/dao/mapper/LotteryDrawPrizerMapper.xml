@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.LotteryDrawPrizerMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.LotteryDrawPrizer">
+        <id column="id" property="id"/>
+        <result column="uid" property="uid"/>
+        <result column="prize" property="prize"/>
+        <result column="value" property="value"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id AS id, uid AS uid, prize AS prize, value AS value
+    </sql>
+
+    <select id="runningHorseLight" resultMap="BaseResultMap">
+        SELECT * FROM `lottery_draw_prizer` where prize IN('一等奖','二等奖','三等奖','四等奖') ORDER BY id desc limit 10
+    </select>
+
+    <select id="queryPrize123" resultMap="BaseResultMap">
+        SELECT * FROM `lottery_draw_prizer` where prize in ('一等奖','二等奖','三等奖') ORDER BY id desc limit 10
+    </select>
+
+    <select id="queryPrize4" resultMap="BaseResultMap">
+        select * from  `lottery_draw_prizer` where prize ='四等奖' ORDER BY id desc limit 10
+    </select>
+
+    <select id="queryPrizeRandom8" resultMap="BaseResultMap">
+         select * from `lottery_draw_prizer` ORDER BY id desc  limit 40
+    </select>
+
+</mapper>

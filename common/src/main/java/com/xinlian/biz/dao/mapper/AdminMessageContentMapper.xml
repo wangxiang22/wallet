@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.AdminMessageContentMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.AdminMessageContent">
+        <id column="id" property="id" />
+        <result column="title" property="title" />
+        <result column="content" property="content" />
+        <result column="type_code" property="typeCode" />
+        <result column="thumbnail" property="thumbnail" />
+        <result column="hyperlink" property="hyperlink" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id AS id, title AS title, content AS content, type_code AS typeCode, thumbnail AS thumbnail, hyperlink AS hyperlink, create_time AS createTime, update_time AS updateTime
+    </sql>
+
+</mapper>

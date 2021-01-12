@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.LotteryDrawMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.LotteryDraw">
+        <id column="id" property="id"/>
+        <result column="prize" property="prize"/>
+        <result column="value" property="value"/>
+        <result column="code" property="code"/>
+        <result column="des" property="des"/>
+        <result column="stock" property="stock"/>
+    </resultMap>
+
+    <update id="subStock" parameterType="java.lang.Integer">
+         update lottery_draw set stock = stock - 1 where id = #{id} and stock &gt; 0;
+    </update>
+
+</mapper>

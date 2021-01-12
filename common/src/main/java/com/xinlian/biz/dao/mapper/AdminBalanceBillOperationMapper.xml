@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.AdminBalanceBillOperationMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.AdminBalanceBillOperation">
+        <id column="id" property="id" />
+        <result column="currency_id" property="currencyId" />
+        <result column="currency_name" property="currencyName" />
+        <result column="bill_name" property="billName" />
+        <result column="hedge_amount" property="hedgeAmount" />
+        <result column="hedge_time" property="hedgeTime" />
+        <result column="remarks" property="remarks" />
+        <result column="operator" property="operator" />
+        <result column="operation_time" property="operationTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id AS id, currency_id AS currencyId, currency_name AS currencyName, bill_name AS billName, hedge_amount AS hedgeAmount,
+        hedge_time AS hedgeTime, remarks AS remarks, operator AS operator, operation_time AS operationTime
+    </sql>
+
+
+    <select id="findBalanceBillOperationPage" resultType="com.xinlian.common.response.BalanceBillOperationRes">
+        select currency_name AS currencyName, bill_name AS billName, hedge_amount AS hedgeAmount,
+               hedge_time AS hedgeTime, remarks AS remarks, operator AS operator, operation_time AS operationTime
+        from admin_balance_bill_operation
+        <where>
+            1=1
+            <if test="currencyName != null and currencyName != ''">
+                and currency_name = #{currencyName}
+            </if>
+            <if test="startHedgeTime != null and startHedgeTime != '' and endHedgeTime != null and endHedgeTime != ''">
+                and hedge_time between #{startHedgeTime} and #{endHedgeTime}
+            </if>
+        </where>
+        order by hedge_time desc
+    </select>
+
+
+    <select id="findBalanceBillTakeInAmount" resultType="java.math.BigDecimal">
+        select sum(hedge_amount)
+        from admin_balance_bill_operation
+        where currency_id = #{currencyId}
+        and hedge_amount &gt; 0
+        and	hedge_time &gt;= DATE_FORMAT(#{startTime}, '%Y-%m-%d' )
+        and hedge_time &lt;= DATE_FORMAT(#{endTime}, '%Y-%m-%d' )
+    </select>
+
+
+    <select id="findBalanceBillExpenditureAmount" resultType="java.math.BigDecimal">
+        select sum(hedge_amount)
+        from admin_balance_bill_operation
+        where currency_id = #{currencyId}
+        and hedge_amount &lt; 0
+        and	hedge_time &gt;= DATE_FORMAT(#{startTime}, '%Y-%m-%d' )
+        and hedge_time &lt;= DATE_FORMAT(#{endTime}, '%Y-%m-%d' )
+    </select>
+
+</mapper>

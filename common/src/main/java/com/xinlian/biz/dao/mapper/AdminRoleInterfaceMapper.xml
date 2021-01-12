@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.AdminRoleInterfaceMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.AdminRoleInterface">
+        <result column="id" property="id" />
+        <result column="role_id" property="roleId" />
+        <result column="interface_id" property="interfaceId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id , role_id , interface_id
+    </sql>
+
+
+    <resultMap id="InterfaceReqMap" type="com.xinlian.biz.model.AdminInterfaceReqModel">
+        <result column="id"           property="id" />
+        <result column="menu_id"      property="menuId" />
+        <result column="interface_url" property="interfaceUrl" />
+        <result column="interface_des" property="interfaceDes" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <sql id="interface_req_column">
+        id , menu_id ,interface_url , interface_des ,status
+    </sql>
+
+    <select id="getInterfaceReqUrlByRoleIds" resultType="java.lang.String" parameterType="com.xinlian.biz.model.AdminRoleInterface">
+        SELECT
+        req.interface_url
+        from
+        admin_interface_req req
+        left join admin_role_interface ref
+        on req.id = ref.interface_id
+        where req.`status` = 1
+        and ref.role_id in
+        <foreach collection="list" item="record" separator=",">
+            ( #{record.id})
+        </foreach>
+    </select>
+
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.AdminRoleMenuMapper">
+  <resultMap id="BaseResultMap" type="com.xinlian.biz.model.AdminRoleMenuRef">
+    <id column="id"  property="id" />
+    <result column="role_id"  property="roleId" />
+    <result column="menu_id"  property="menuId" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, role_id, menu_id
+  </sql>
+  <select id="query" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from admin_role_menu
+    where id = #{id}
+  </select>
+  <delete id="delete" parameterType="java.lang.Long">
+    delete from admin_role_menu
+    where id = #{id}
+  </delete>
+  <delete id="deleteByRoleId" parameterType="java.lang.Long">
+    delete from admin_role_menu
+    where role_id = #{roleId}
+  </delete>
+  <insert id="insert" parameterType="com.xinlian.biz.model.AdminRoleMenuRef">
+    insert into admin_role_menu (id, role_id, menu_id
+      )
+    values (#{id}, #{roleId}, #{menuId}
+      )
+  </insert>
+
+  <update id="update" parameterType="com.xinlian.biz.model.AdminRoleMenuRef">
+    update admin_role_menu
+    <set>
+      <if test="roleId != null">
+        role_id = #{roleId},
+      </if>
+      <if test="menuId != null">
+        menu_id = #{menuId},
+      </if>
+    </set>
+    where id = #{id}
+  </update>
+
+
+</mapper>

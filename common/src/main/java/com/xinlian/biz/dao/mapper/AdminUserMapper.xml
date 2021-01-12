@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.AdminUserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.AdminUser">
+        <id column="id" property="id" />
+        <result column="username"     property="username" />
+        <result column="real_name"    property="realName" />
+        <result column="account_desc" property="accountDesc"/>
+        <result column="password"     property="password" />
+        <result column="salt"         property="salt" />
+        <result column="create_time"  property="createTime" />
+        <result column="creater"      property="creater" />
+        <result column="update_time"  property="updateTime" />
+        <result column="updater"      property="updater" />
+        <result column="status"       property="status" />
+        <result column="email_address" property="emailAddress"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, username, real_name, account_desc, password, salt, create_time, creater, update_time, updater, status,email_address
+    </sql>
+
+    <select id="query" resultMap="BaseResultMap" parameterType="com.xinlian.biz.model.AdminUser">
+        select user1.id,
+        username, real_name, account_desc, password, salt, create_time, creater, update_time, updater,
+        status,role.role_name as roleNameByUser from
+        admin_user user1
+        left join admin_user_role ref on ref.user_id = user1.id
+        left join admin_role role on ref.role_id = role.id
+        <where>
+            <if test="status!=null">
+                and user1.status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="getEmailByUserName" resultType="java.lang.String" parameterType="java.lang.String">
+        select email_address from admin_user where username=#{userName}
+    </select>
+</mapper>

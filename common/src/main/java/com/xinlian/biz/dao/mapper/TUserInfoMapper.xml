@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TUserInfoMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TUserInfo">
+        <id column="uid" property="uid" />
+        <result column="user_name" property="userName" />
+        <result column="nick_name" property="nickName" />
+        <result column="real_name" property="realName" />
+        <result column="mobile" property="mobile" />
+        <result column="email" property="email" />
+        <result column="head_portrait_url" property="headPortraitUrl" />
+        <result column="id_no" property="idNo" />
+        <result column="auth_sfzfm_url" property="authSfzfmUrl" />
+        <result column="auth_sfzzm_url" property="authSfzzmUrl" />
+        <result column="auth_scsfz_url" property="authScsfzUrl" />
+        <result column="real_auth_status" property="realAuthStatus" />
+        <result column="regip" property="regip" />
+        <result column="regtime" property="regtime" />
+        <result column="country_code" property="countryCode"/>
+        <result column="server_node_id" property="serverNodeId" />
+        <result column="is_update_pass" property="isUpdatePass" />
+        <result column="levelid" property="levelid" />
+        <result column="salt" property="salt" />
+        <result column="login_pass_word" property="loginPassWord" />
+        <result column="pay_pass_word" property="payPassWord" />
+        <result column="last_login_time" property="lastLoginTime" />
+        <result column="token" property="token" />
+        <result column="create_time" property="createTime" />
+        <result column="updateor" property="updateor" />
+        <result column="update_time" property="updateTime" />
+        <result column="orem_state" property="oremState" />
+        <result column="province_name" property="provinceName" />
+        <result column="city_name" property="cityName" />
+        <result column="pledge_state" property="pledgeState" />
+        <result column="pledge_time" property="pledgeTime" />
+        <result column="level_status" property="levelStatus" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        uid, user_name, nick_name, real_name, mobile, email, head_portrait_url, id_no, auth_sfzfm_url,
+        auth_sfzzm_url, auth_scsfz_url, real_auth_status,country_code,
+        regip, regtime, server_node_id, is_update_pass, levelid, salt, login_pass_word, pay_pass_word,
+        last_login_time, token, create_time, updateor, update_time,orem_state,province_name,city_name,
+        pledge_state,pledge_time,level_status
+    </sql>
+
+
+    <select id="queryUserName" resultType="com.xinlian.common.response.UserMessageRes">
+        select  a.uid, a.server_node_name as serverNodeName ,a.user_name as userName,a.active_time as activeTime,a.orem_state as oreState,
+        b.real_name as authName ,b.auth_sn as authSn ,c.logo_url as logoUrl  from t_user_info as a left  join
+         t_user_auth as b on a.uid=b.uid
+          join t_server_node as c on a.server_node_id = c.id
+          where a.mobile=#{mobile} order by a.server_node_id
+    </select>
+
+    <select id="getOneModel" parameterType="com.xinlian.biz.model.TUserInfo" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from t_user_info
+        <where>
+            <if test="uid!=null">
+                and uid = #{uid}
+            </if>
+            <if test="serverNodeId!=null">
+                and server_node_id = #{serverNodeId}
+            </if>
+            <if test="userName!=null and userName!=''">
+                and user_name = #{userName}
+            </if>
+        </where>
+        limit 1
+    </select>
+
+    <select id="queryGrandTotalRegisterValue" resultType="java.lang.Long">
+        select count(uid) from t_user_info
+        <where>
+            <if test="flagToday!=null">
+                and date_format(create_time,'%Y-%m-%d')  = date_format(NOW(),'%Y-%m-%d')
+            </if>
+        </where>
+    </select>
+
+    <select id="queryGrandTotalIdNosValue" resultType="java.lang.Long">
+        select count(*) from
+        (
+          SELECT count(uid) from t_user_auth auth
+          <where>
+              <if test="flagToday!=null">
+                  FROM_UNIXTIME (`input_time`, '%Y-%m-%d') = date_format(NOW(),'%Y-%m-%d')
+              </if>
+          </where>
+          GROUP BY auth.auth_sn
+        ) as middleTable;
+    </select>
+
+    <select id="queryActivateTotalValue" resultType="java.lang.Long">
+        select count(uid) from t_user_info where orem_state = 1
+        <if test="flagToday!=null">
+            and date_format(active_time,'%Y-%m-%d') = date_format(NOW(),'%Y-%m-%d')
+        </if>
+    </select>
+
+    <select id="serverNodeRegisterRank" resultType="com.xinlian.common.response.ServerNodeRankResponse">
+        SELECT count(uid) as registerNum, node.name as serverNodeName,
+        node.id as serverNodeId,
+        node.parent_id as parentId,
+        node.parent_ids as parentIds
+        from t_server_node node
+        left join t_user_info uinfo
+        on node.id = uinfo.server_node_id
+        <if test="startDate!=null and startDate!=''">
+            and uinfo.create_time &gt;= DATE_FORMAT(#{startDate}, '%Y-%m-%d %H-%i-%s')
+        </if>
+        <if test="endDate!=null and endDate!=''">
+            and uinfo.create_time &lt;= DATE_FORMAT(#{endDate}, '%Y-%m-%d %H-%i-%s')
+        </if>
+        GROUP BY node.id
+    </select>
+
+    <select id="serverNodeActivateRank" resultType="com.xinlian.common.response.ServerNodeRankResponse">
+        SELECT count(uid) as registerNum, node.name as serverNodeName,
+        node.id as serverNodeId,
+        node.parent_id as parentId,
+        node.parent_ids as parentIds
+        from t_server_node node
+        left join t_user_info uinfo
+        on node.id = uinfo.server_node_id
+        where orem_state = 1
+        <if test="startDate!=null and startDate!=''">
+            and create_time &gt;= DATE_FORMAT(#{startDate}, '%Y-%m-%d %H-%i-%s')
+        </if>
+        <if test="endDate!=null and endDate!=''">
+            and create_time &lt;= DATE_FORMAT(#{endDate}, '%Y-%m-%d %H-%i-%s')
+        </if>
+        GROUP BY node.id
+        <!--因节点不能注册所以无相关数据-->
+        UNION
+        SELECT
+        0 AS registerNum,
+        node. NAME AS serverNodeName,
+        node.id AS serverNodeId,
+        node.parent_id AS parentId,
+        node.parent_ids AS parentIds
+        FROM
+        t_server_node node
+        where node.id = 118
+    </select>
+
+    <select id="statisticsNewCustomerTrend" resultType="com.xinlian.common.response.NewCustomerTrendResponse">
+        SELECT
+        count(*) as registerNum,
+        <if test="dimensionsType=='YEAR'">
+            MONTH(create_time) as dateStr
+        </if>
+        <if test="dimensionsType=='MONTH'">
+            DAY(create_time) as dateStr
+        </if>
+        <if test="dimensionsType=='WEEK'">
+            WEEKDAY(create_time)+1 as dateStr
+        </if>
+        <if test="dimensionsType=='TODAY'">
+            HOUR(create_time)+1 as dateStr
+        </if>
+        from t_user_info
+        <where>
+            <if test="dimensionsType=='YEAR'">
+                and year(create_time) = year(now()) GROUP BY MONTH(create_time)
+            </if>
+            <if test="dimensionsType=='MONTH'">
+                and MONTH(create_time) = MONTH(now()) GROUP BY DAY(create_time) order by DAY(create_time)
+            </if>
+            <if test="dimensionsType=='WEEK'">
+                and create_time &gt;= DATE_FORMAT(#{firstDayOfWeekTimeStr},'%Y-%m-%d %H-%i-%s')
+                and create_time &lt;= DATE_FORMAT(#{lastDayOfWeekTimeStr},'%Y-%m-%d %H-%i-%s')
+                GROUP BY DAY(create_time) order by day(create_time)
+            </if>
+            <if test="dimensionsType=='TODAY'">
+                and TO_DAYS(create_time) = TO_DAYS(now())
+                GROUP BY HOUR(create_time) order by hour(create_time)
+            </if>
+        </where>
+
+    </select>
+
+    <select id="selectUp" resultType="com.xinlian.common.response.InviteUserRes">
+        select uid,user_name userName,mobile phone,email,server_node_name nodeName
+        from t_user_info
+        where uid=#{uid}
+    </select>
+    <select id="selectDown" resultType="com.xinlian.common.response.InviteUserRes">
+        select uid,user_name userName,mobile phone,email,server_node_name nodeName
+        from t_user_info
+        where parent_id=#{uid}
+        order by uid asc
+    </select>
+
+    <select id="queryUserList" resultType="com.xinlian.common.response.UserInfoManagerRes" parameterType="com.xinlian.common.request.UserInfoManagerReq">
+        select ui.uid as uid,ui.user_name as userName,ui.mobile as mobile,ui.email as email,ui.head_portrait_url as headPortraitUrl,
+                ui.server_node_name as serverNodeName,ui.create_time as createTime,ui.update_time as updateTime,ui.invitation_code as invitationCode,
+                ui.level_status as levelStatus,ui.freeze_reson as freezeReson,ui.orem_state as oremState,ui.active_time as activeTime,
+                ua.real_name as realName,ua.auth_sn as authSn
+        from t_user_info as ui
+        left join t_user_auth as ua on ui.uid = ua.uid
+        <where>
+            1=1
+            <if test="uid != null">
+                and ui.uid = #{uid}
+            </if>
+            <if test="userName != null and userName != ''">
+                and ui.user_name like concat(#{userName},'%')
+            </if>
+            <if test="mobile != null and mobile != ''">
+                and ui.mobile = #{mobile}
+            </if>
+            <if test="email != null and email != ''">
+                and ui.email = #{email}
+            </if>
+            <if test="realName != null and realName != ''">
+                and ua.real_name like concat('%',#{realName},'%')
+            </if>
+            <if test="authSn != null and authSn != ''">
+                and ua.auth_sn = #{authSn}
+            </if>
+            <if test="invitationCode != null and invitationCode != ''">
+                and ui.invitation_code = #{invitationCode}
+            </if>
+            <if test="levelStatus != null">
+                and ui.level_status = #{levelStatus}
+            </if>
+            <if test="serverNodeId != null">
+                and ui.server_node_id = #{serverNodeId}
+            </if>
+        </where>
+        order by ui.uid asc
+        limit #{startIndex},#{pageSize}
+    </select>
+
+    <select id="queryUserListCount" resultType="java.lang.Long" parameterType="com.xinlian.common.request.UserInfoManagerReq">
+        select count(ui.uid)
+        from t_user_info as ui
+        left join t_user_auth as ua on ui.uid = ua.uid
+        <where>
+            1=1
+            <if test="uid != null">
+                and ui.uid = #{uid}
+            </if>
+            <if test="userName != null and userName != ''">
+                and ui.user_name like concat('%',#{userName},'%')
+            </if>
+            <if test="mobile != null and mobile != ''">
+                and ui.mobile = #{mobile}
+            </if>
+            <if test="email != null and email != ''">
+                and ui.email = #{email}
+            </if>
+            <if test="realName != null and realName != ''">
+                and ua.real_name like concat('%',#{realName},'%')
+            </if>
+            <if test="authSn != null and authSn != ''">
+                and ua.auth_sn = #{authSn}
+            </if>
+            <if test="invitationCode != null and invitationCode != ''">
+                and ui.invitation_code = #{invitationCode}
+            </if>
+            <if test="levelStatus != null">
+                and ui.level_status = #{levelStatus}
+            </if>
+            <if test="serverNodeId != null">
+                and ui.server_node_id = #{serverNodeId}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryUserInvitationNum" resultType="java.lang.Long">
+        select count(1) from t_user_info where parent_id=#{uid}
+    </select>
+
+    <select id="queryUserByNewWallet" resultType="com.xinlian.common.response.WalletFindUserRes">
+        select ui.uid as uid,ui.user_name as userName,ui.mobile as mobile,ui.head_portrait_url as headPortraitUrl,
+                ui.level_status as levelStatus,ui.orem_state as oremState,wi.currency_address as currencyAddress,
+                wi.udun_currency_address as udunCurrencyAddress
+        from t_user_info as ui
+        left join t_wallet_info as wi on ui.uid = wi.uid
+        where wi.currency_id = 5 and (wi.currency_address = #{currencyAddress} or wi.udun_currency_address = #{currencyAddress}) limit 1
+    </select>
+
+    <select id="queryUserByTrcWallet" resultType="com.xinlian.common.response.WalletFindUserRes">
+        select ui.uid as uid,ui.user_name as userName,ui.mobile as mobile,ui.head_portrait_url as headPortraitUrl,
+                ui.level_status as levelStatus,ui.orem_state as oremState,wi.currency_address as currencyAddress
+        from t_user_info as ui
+        left join t_trc_wallet_info as wi on ui.uid = wi.uid
+        where wi.currency_address = #{currencyAddress}
+    </select>
+
+    <select id="queryUserState" resultType="com.xinlian.common.dto.UserInfoDto">
+        select uid,level_status levelStatus,orem_state oremState,server_node_id nodeId from t_user_info where orem_state=1
+    </select>
+
+    <select id="findUserIdAll" resultType="java.lang.String">
+        select uid from t_user_info
+    </select>
+
+    <update id="updateUserInfo" parameterType="com.xinlian.biz.model.TUserInfo" >
+        update t_user_info set pledge_state = #{pledgeState},
+        pledge_time = #{pledgeTime}
+        where uid = #{uid}
+    </update>
+
+    <select id="getNodePhoneStayActivateNumber" resultType="java.lang.Integer">
+        select count(uinfo.uid)
+        from `t_server_node` node LEFT JOIN `t_user_info` uinfo
+        on uinfo.`server_node_id` = node.`id`
+        where node.`parent_ids` like '0,118,%' and uinfo.mobile = #{mobile} and uinfo.`orem_state` = 0
+    </select>
+
+    <select id="getNodeEmailStayActivateNumber" resultType="java.lang.Integer">
+        select count(uinfo.uid)
+        from `t_server_node` node LEFT JOIN `t_user_info` uinfo
+        on uinfo.`server_node_id` = node.`id`
+        where node.`parent_ids` like '0,118,%' and uinfo.email = #{email} and uinfo.`orem_state` = 0
+    </select>
+
+    <select id="queryBuyerInfoByAddr" resultType="com.xinlian.common.response.QueryBuyerRes" parameterType="java.lang.String">
+        select user_name username,mobile phone,twi.uid uid
+        from t_user_info tui
+        JOIN t_wallet_info twi
+        on tui.uid = twi.uid and twi.currency_id = 6
+        where twi.currency_address=#{addr}
+    </select>
+
+    <select id="getFirstLevelUserInfoByAuthSn" resultType="com.xinlian.biz.model.next.NextUserInfoModel" parameterType="com.xinlian.biz.model.next.NextUserInfoModel">
+        select u.uid,auth.real_name as realName,
+        auth.auth_sn as authSn,
+        u.mobile,
+        u.orem_state as oremState ,
+        u.active_time as activeTime,
+        1 as currentLevel
+        from t_user_info u
+        left join t_user_auth auth on u.uid=auth.uid
+        where u.parent_id
+        in
+        (
+        select u.uid from t_user_info u left join t_user_auth auth on u.uid=auth.uid
+        where auth.auth_sn = #{authSn}
+        )
+        GROUP BY auth.auth_sn
+    </select>
+
+
+    <select id="getNextLevelUserInfoByAuthSnList" resultType="com.xinlian.biz.model.next.NextUserInfoModel" parameterType="com.xinlian.biz.model.next.NextUserInfoModel">
+        select u.uid,
+        auth.real_name as realName,
+        auth.auth_sn as authSn,
+        u.mobile,
+        u.orem_state as oremState ,
+        u.active_time as activeTime
+        from t_user_info u
+        left join t_user_auth auth on u.uid=auth.uid
+        left join t_user_auth parent on parent.uid = u.parent_id
+        where auth.auth_sn != parent.auth_sn and u.parent_id
+        in
+        (
+        select u.uid from t_user_info u left join t_user_auth auth on u.uid=auth.uid
+        where auth.auth_sn in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item.authSn}
+        </foreach>
+        )
+        GROUP BY auth.auth_sn
+    </select>
+
+    <insert id="batchInsertTempUser" parameterType="java.util.List">
+        insert into temp_user_info (
+        uid,
+        real_name,
+        auth_sn,
+        mobile,
+        orem_state,
+        active_time,
+        current_level,createtime)
+        values
+        <foreach collection="list" item="record" separator=",">
+            ( #{record.uid},
+            #{record.realName},
+            #{record.authSn},
+            #{record.mobile},
+            #{record.oremState},
+            #{record.activeTime},
+            #{record.currentLevel}, CURRENT_TIMESTAMP)
+        </foreach>
+    </insert>
+
+    <!--uid-->
+    <select id="getFirstLevelUserUidByAuthSn" resultType="com.xinlian.biz.model.next.NextUserInfoByUIdModel" parameterType="com.xinlian.biz.model.next.NextUserInfoByUIdModel">
+        select u.uid,auth.real_name as realName,
+        auth.auth_sn as authSn,
+        u.mobile,
+        u.orem_state as oremState ,
+        u.active_time as activeTime,
+        u.parent_id as uParentUid ,
+        parent.uid as parentUid,
+	    parent.auth_sn as parentAuthSn,
+        parent.real_name as parentRealName,
+        1 as currentLevel
+        from t_user_info u
+        left join t_user_auth auth on u.uid=auth.uid
+        left join t_user_auth parent on u.parent_id = parent.uid
+        where u.parent_id
+        in
+        (
+        select u.uid from t_user_info u left join t_user_auth auth on u.uid=auth.uid
+        where auth.auth_sn = #{authSn}
+        )
+        GROUP BY auth.auth_sn
+    </select>
+
+    <select id="getNextLevelUserInfoByUidList" resultType="com.xinlian.biz.model.next.NextUserInfoByUIdModel" parameterType="com.xinlian.biz.model.next.NextUserInfoByUIdModel">
+        select u.uid,
+        auth.real_name as realName,
+        auth.auth_sn as authSn,
+        u.mobile,
+        u.orem_state as oremState ,
+        u.active_time as activeTime,
+        u.parent_id as uParentUid ,
+        parent.uid as parentUid,
+        parent.auth_sn as parentAuthSn,
+        parent.real_name as parentRealName
+        from t_user_info u
+        left join t_user_auth auth on u.uid=auth.uid
+        left join t_user_auth parent on parent.uid = u.parent_id
+        where u.parent_id
+        in
+        (
+        select u.uid from t_user_info u left join t_user_auth auth on u.uid=auth.uid
+        where u.uid in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item.uid}
+        </foreach>
+        )
+        and auth.auth_sn != parent.auth_sn
+        GROUP BY auth.auth_sn
+    </select>
+
+    <insert id="batchInsertTempUserUids" parameterType="java.util.List">
+        insert into temp_user_info_uids (
+        uid,
+        real_name,
+        auth_sn,
+        mobile,
+        orem_state,
+        active_time,
+        current_level,
+        u_parent_id,
+        parent_uid,
+        parent_auth_sn,
+        parent_real_name,
+        createtime)
+        values
+        <foreach collection="list" item="record" separator=",">
+            ( #{record.uid},
+            #{record.realName},
+            #{record.authSn},
+            #{record.mobile},
+            #{record.oremState},
+            #{record.activeTime},
+            #{record.currentLevel},
+            #{record.uParentUid},
+            #{record.parentUid},
+            #{record.parentAuthSn},
+            #{record.parentRealName},
+            CURRENT_TIMESTAMP)
+        </foreach>
+    </insert>
+
+    <select id="getAllUserNode" resultType="com.xinlian.biz.model.next.NextUserInfoByUIdModel">
+        select
+        uid,
+        real_name as realName,
+        auth_sn as authSn,
+        mobile,
+        orem_state as oremState ,
+        active_time as activeTime,
+        current_level as currentLevel,
+        u_parent_id as uParentUid ,
+        parent_uid as parentUid,
+        parent_auth_sn as parentAuthSn,
+        parent_real_name as parentRealName
+        from temp_user_info_uids
+    </select>
+</mapper>

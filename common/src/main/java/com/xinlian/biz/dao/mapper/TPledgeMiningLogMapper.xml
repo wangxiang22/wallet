@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TPledgeMiningLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TPledgeMiningLog">
+        <id column="id" property="id" />
+        <result column="uid" property="uid" />
+        <result column="status" property="status" />
+        <result column="result" property="result" />
+        <result column="create_time" property="createTime" />
+        <result column="request_time" property="requestTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id AS id, uid AS uid, status AS status, result AS result, create_time AS createTime, request_time AS requestTime
+    </sql>
+
+
+    <select id="findNotRequestOne" resultType="com.xinlian.common.dto.PledgeUidStatusDto">
+        select twto.uid,tpml.status
+        from t_wallet_trade_order as twto
+        left join t_pledge_mining_log as tpml on twto.uid = tpml.uid
+        where twto.create_time &gt;= #{time} and twto.trade_status = 7 and twto.trade_type = 2 and twto.des = '保证金交纳' and twto.currency_id = 6
+        and (tpml.status is null or tpml.status = 3) limit 1
+    </select>
+
+    <select id="findPledgeUserOne" resultType="com.xinlian.common.response.PledgeMiningRes">
+        select tui.uid as uid,tui.user_name as userName,tui.server_node_id as nodeId,tui.server_node_name as nodeName,
+               tui.mobile as phone,tua.real_name as authName,tua.auth_sn as authSn,tui.head_portrait_url as pic,
+               twi.currency_address as walletAddress
+        from t_user_info as tui
+        left join t_user_auth as tua on tui.uid = tua.uid
+        left join t_wallet_info twi on tui.uid = twi.uid
+        where twi.currency_id = 6 and tui.uid = #{uid}
+    </select>
+
+</mapper>

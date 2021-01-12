@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.WithdrawCustomerMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.WithdrawCustomerModel">
+        <id column="id" property="id" />
+        <result column="uid" property="uid" />
+        <result column="withdraw_status" property="withdrawStatus" />
+        <result column="allow_withdraw_num" property="allowWithdrawNum" />
+        <result column="createtime" property="createtime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, uid, withdraw_status, allow_withdraw_num, createtime
+    </sql>
+
+    <select id="getByCriteria" resultMap="BaseResultMap" parameterType="com.xinlian.biz.model.WithdrawCustomerModel">
+        select <include refid="Base_Column_List"/>
+        from t_withdraw_customer
+        <where>
+            <if test="uid!=null">
+                and uid = #{uid}
+            </if>
+            <if test="withdrawStatus!=null">
+                and withdraw_status = #{withdrawStatus}
+            </if>
+                and allow_withdraw_num &gt;= #{allowWithdrawNum}
+        </where>
+        order by id desc
+        limit 1
+    </select>
+
+    <update id="updateModel" parameterType="com.xinlian.biz.model.WithdrawCustomerModel">
+        update t_withdraw_customer
+        set allow_withdraw_num = allow_withdraw_num - #{allowWithdrawNum}
+        <where>
+            <if test="allowWithdrawNum!=null">
+                and allow_withdraw_num &gt;= #{allowWithdrawNum}
+            </if>
+            and id = #{id}
+        </where>
+    </update>
+
+    <select id="getWithdrawStatus" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/> from t_withdraw_customer where uid = #{uid} order by createtime desc limit 1
+    </select>
+
+    <select id="query" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from t_withdraw_customer
+        where withdraw_status = 1
+    </select>
+</mapper>

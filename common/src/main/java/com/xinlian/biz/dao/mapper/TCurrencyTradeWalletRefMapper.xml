@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TCurrencyTradeWalletRefMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TCurrencyTradeWalletRef">
+        <id column="id" property="id" />
+        <result column="currency_id" property="currencyId" />
+        <result column="main_currency_code" property="mainCurrencyCode" />
+        <result column="child_currency_code" property="childCurrencyCode" />
+        <result column="currency_name" property="currencyName" />
+        <result column="currency_english_name" property="currencyEnglishName" />
+        <result column="currency_chinese_name" property="currencyChineseName" />
+        <result column="belong_to_system_code" property="belongToSystemCode" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, currency_id, main_currency_code, child_currency_code, currency_name, currency_english_name, currency_chinese_name, belong_to_system_code
+    </sql>
+
+</mapper>

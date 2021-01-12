@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TWalletInfoMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TWalletInfo">
+        <id column="id" property="id" />
+        <result column="uid" property="uid" />
+        <result column="currency_id" property="currencyId" />
+        <result column="currency_code" property="currencyCode" />
+        <result column="currency_address" property="currencyAddress" />
+        <result column="balance_num" property="balanceNum" />
+        <result column="frozen_num" property="frozenNum" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, uid, currency_id, currency_code, currency_address, balance_num, frozen_num
+    </sql>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into t_wallet_info (id, uid, currency_id, currency_code, currency_address, balance_num, frozen_num)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id},
+            #{item.uid},
+            #{item.currencyId},
+            #{item.currencyCode},
+            #{item.currencyAddress},
+            #{item.balanceNum},
+            #{item.frozenNum}
+            )
+        </foreach>
+    </insert>
+
+    <update id="substactMoneyForOrem" parameterType="com.xinlian.biz.model.TWalletInfo">
+        update t_wallet_info
+         set balance_num=balance_num-#{balanceNum}
+         where currency_id=#{currencyId}
+         and uid = #{uid}
+         and balance_num &gt;= #{balanceNum}
+    </update>
+
+    <select id="getByCriteria" resultMap="BaseResultMap" parameterType="com.xinlian.biz.model.TWalletInfo">
+        select
+        <include refid="Base_Column_List"/>
+        from t_wallet_info
+        <where>
+            <if test="currencyAddress!=null and currencyAddress!=''">
+                and currency_address = #{currencyAddress}
+            </if>
+            <if test="udunCurrencyAddress!=null and udunCurrencyAddress!=''">
+                and udun_currency_address = #{udunCurrencyAddress}
+            </if>
+            <if test="currencyCode!=null and currencyCode!=''">
+                and currency_code = #{currencyCode}
+            </if>
+            <if test="uid != null ">
+                and uid = #{uid}
+            </if>
+            <if test="currencyId!=null">
+                and currency_id = #{currencyId}
+            </if>
+        </where>
+        limit 1
+        for update
+    </select>
+
+    <select id="getByCriteriaNoLock" resultMap="BaseResultMap" parameterType="com.xinlian.biz.model.TWalletInfo">
+        select
+        <include refid="Base_Column_List"/>
+        from t_wallet_info
+        <where>
+            <if test="currencyAddress!=null and currencyAddress!=''">
+                and currency_address = #{currencyAddress}
+            </if>
+            <if test="udunCurrencyAddress!=null and udunCurrencyAddress!=''">
+                and udun_currency_address = #{udunCurrencyAddress}
+            </if>
+            <if test="currencyCode!=null and currencyCode!=''">
+                and currency_code = #{currencyCode}
+            </if>
+            <if test="uid != null ">
+                and uid = #{uid}
+            </if>
+            <if test="currencyId!=null">
+                and currency_id = #{currencyId}
+            </if>
+        </where>
+        limit 1
+    </select>
+
+    <update id="updateModel" parameterType="com.xinlian.biz.model.TWalletInfo">
+        update t_wallet_info
+         <set>
+             <if test="balanceNum!=null">
+                 balance_num = #{balanceNum},
+             </if>
+             <if test="frozenNum!=null">
+                 frozen_num = #{frozenNum},
+             </if>
+         </set>
+         where id = #{id}
+    </update>
+
+    <update id="disposalBalanceAndFreeze" parameterType="com.xinlian.biz.model.TWalletInfo">
+        update t_wallet_info
+        set
+                balance_num = balance_num - #{frozenNum},
+                frozen_num = frozen_num + #{frozenNum}
+        <where>
+            <if test="uid!=null">
+                and uid = #{uid}
+            </if>
+            <if test="currencyId!=null">
+                and currency_id = #{currencyId}
+            </if>
+                and #{frozenNum} &lt;= balance_num
+        </where>
+    </update>
+
+    <update id="toWalletInfoAddBalanceNum" parameterType="com.xinlian.biz.model.TWalletInfo">
+        update t_wallet_info
+        set balance_num = balance_num + #{movableAssetsNum}
+        where id = #{id}
+    </update>
+
+    <update id="fromWalletInfoAbatmentBalanceNum" parameterType="com.xinlian.biz.model.TWalletInfo">
+        update t_wallet_info
+        set balance_num = balance_num - #{movableAssetsNum}
+        where id = #{id} and balance_num &gt;= #{movableAssetsNum}
+    </update>
+    
+    <update id="disposalBalanceAndUnFreeze" parameterType="com.xinlian.biz.model.TWalletInfo">
+        update t_wallet_info
+        set
+        balance_num = balance_num + #{frozenNum},
+        frozen_num = frozen_num - #{frozenNum}
+        <where>
+            <if test="uid!=null">
+                and uid = #{uid}
+            </if>
+            <if test="currencyId!=null">
+                and currency_id = #{currencyId}
+            </if>
+        </where>
+    </update>
+
+    <update id="allocationCurrencyAddress" parameterType="com.xinlian.biz.model.TWalletInfo">
+        update t_wallet_info
+        set
+        currency_address = #{currencyAddress}
+        where uid = #{uid} and currency_address is null
+    </update>
+
+    <update id="despoit" parameterType="com.xinlian.biz.model.UserCurrencyStateReq">
+        update t_wallet_info set balance_num=balance_num+#{amount} where uid = #{uid} and currency_id=#{currencyId}
+    </update>
+
+    <update id="withdraw" parameterType="com.xinlian.biz.model.UserCurrencyStateReq">
+        update t_wallet_info set balance_num=balance_num-#{amount}
+        where uid = #{uid} and currency_id=#{currencyId} and balance_num &gt;= #{amount}
+    </update>
+
+    <update id="subFrozen" parameterType="com.xinlian.biz.model.UserCurrencyStateReq">
+        update t_wallet_info set frozen_num=frozen_num-#{amount} where uid = #{uid} and currency_id=#{currencyId}
+    </update>
+
+    <update id="batchChainOwnerAddCat" parameterType="com.xinlian.biz.model.TReleaseCatRecord">
+        update t_wallet_info
+        set balance_num = balance_num + #{groupByReleaseCatNum}
+        where
+        currency_id = #{currencyId}
+        and uid in
+        <foreach collection="releaseCatRecordList" item="item" open="(" close=")" separator=",">
+            #{item.uid}
+        </foreach>
+    </update>
+
+    <select id="queryTotalWalletData" resultType="java.util.Map">
+        select sum(balance_num) as balanceTotal, sum(frozen_num) as freezeTotal from t_wallet_info
+        where currency_code = #{currencyCode}
+    </select>
+
+    <update id="batchUpdateWalletInfo" parameterType="com.xinlian.biz.model.TWalletInfo">
+        <foreach collection="list" item="record" separator=";" open="" close="">
+            update t_wallet_info
+            <set>
+                balance_num = balance_num + #{record.balanceNum}
+            </set>
+            where uid = #{record.uid} and currency_id = #{record.currencyId}
+        </foreach>
+    </update>
+
+
+
+    <!-- 钱包增加余额，主要为了火箭的钱转过来 -->
+    <select id="queryWalletByUid" resultMap="BaseResultMap">
+        select id, uid, currency_id, currency_code, currency_address, balance_num, frozen_num from t_wallet_info where uid=#{uid} and currency_code=#{coinName}
+    </select>
+
+    <update id="updateWalletMoney" >
+        update t_wallet_info set balance_num=#{balance} where uid=#{uid} and currency_code=#{coinName}
+    </update>
+
+
+    <update id="updateReduceBalanceNum">
+        update t_wallet_info
+        set balance_num = balance_num - #{amount}
+        where uid = #{uid} and currency_id = #{currencyId}
+    </update>
+
+    <update id="updateAddBalanceNum">
+        update t_wallet_info
+        set balance_num = balance_num + #{amount}
+        where uid = #{uid} and currency_id = #{currencyId}
+    </update>
+
+    <update id="updateFrozenNum" parameterType="com.xinlian.biz.model.TWalletInfo">
+        update t_wallet_info
+        set frozen_num = frozen_num - #{frozenNum}
+        <where>
+            <if test="uid != null">
+                and uid = #{uid}
+            </if>
+            <if test="currencyId != null">
+                and currency_id = #{currencyId}
+            </if>
+        </where>
+    </update>
+
+    <update id="frozen" parameterType="com.xinlian.common.request.SellCatReq">
+        update t_wallet_info
+        set frozen_num = frozen_num + #{amount},balance_num = balance_num - #{amount}
+        where uid = #{uid} and currency_id = #{currencyId} and balance_num-#{amount} &gt;= 0
+    </update>
+
+    <select id="queryAccount" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select * from t_wallet_info where uid = #{uid} and (currency_id=5 or currency_id = 6)
+    </select>
+
+    <select id="queryUidbyAddr" parameterType="java.lang.String" resultType="java.lang.Long">
+        select uid from t_wallet_info where currency_address=#{address} limit 1
+    </select>
+
+    <update id="updateModelByTrcRecharge" parameterType="com.xinlian.biz.model.TWalletInfo">
+        update t_wallet_info
+        <set>
+            <if test="movableAssetsNum!=null">
+                balance_num = balance_num + #{movableAssetsNum},
+            </if>
+        </set>
+        where uid = #{uid} and currency_id = #{currencyId}
+    </update>
+
+
+
+</mapper>

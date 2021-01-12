@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TUserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.hicat.TUser">
+        <id column="id" property="id" />
+        <result column="_uid" property="uid" />
+        <result column="_name" property="name" />
+        <result column="_display_name" property="displayName" />
+        <result column="_gender" property="gender" />
+        <result column="_portrait" property="portrait" />
+        <result column="_mobile" property="mobile" />
+        <result column="_email" property="email" />
+        <result column="_address" property="address" />
+        <result column="_company" property="company" />
+        <result column="_social" property="social" />
+        <result column="_passwd_md5" property="passwdMd5" />
+        <result column="_salt" property="salt" />
+        <result column="_extra" property="extra" />
+        <result column="_type" property="type" />
+        <result column="_dt" property="dt" />
+        <result column="_createTime" property="createtime" />
+        <result column="_deleted" property="deleted" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id AS id, _uid AS uid, _name AS name, _display_name AS displayName, _gender AS gender, _portrait AS portrait, _mobile AS mobile, _email AS email, _address AS address, _company AS company, _social AS social, _passwd_md5 AS passwdMd5, _salt AS salt, _extra AS extra, _type AS type, _dt AS dt, _createTime AS createtime, _deleted AS deleted
+    </sql>
+
+    <select id="findUserByUidList" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/> from t_user
+        <where>
+            1=1
+            <if test="list != null and list.size > 0">
+                and _uid in
+                <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+</mapper>

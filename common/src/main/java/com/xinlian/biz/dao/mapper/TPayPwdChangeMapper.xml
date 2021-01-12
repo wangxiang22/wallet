@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TPayPwdChangeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TPayPwdChange">
+        <id column="id" property="id" />
+        <result column="uid" property="uid" />
+        <result column="real_name" property="realName" />
+        <result column="auth_no" property="authNo" />
+        <result column="auth_scsfz" property="authScsfz" />
+        <result column="remark" property="remark" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="state" property="state" />
+        <result column="pay_password" property="payPassword" />
+        <result column="user_name" property="userName" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id AS id, uid AS uid, real_name AS realName, auth_no AS authNo, auth_scsfz AS authScsfz, remark AS remark, create_time AS createTime, update_time AS updateTime
+    </sql>
+
+    <select id="queryState" resultMap="BaseResultMap">
+        select * from t_pay_pwd_change where uid =#{userId} order by id desc limit 1
+    </select>
+</mapper>

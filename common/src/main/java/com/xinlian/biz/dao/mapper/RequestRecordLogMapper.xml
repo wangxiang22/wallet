@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.RequestRecordLogMapper">
+
+
+
+    <insert id="threadSaveRequestRecordLog" parameterType="com.xinlian.biz.model.RequestRecordLogModel">
+        insert into t_request_record_log
+        (request_url,task_time,jvm_param,uid,request_ip,server_intranet_ip,belong_system,createtime)
+        values
+        (#{requestUrl},#{taskTime},#{jvmParam},#{uid},#{requestIp},#{serverIntranetIp},#{belongSystem},CURRENT_TIMESTAMP)
+    </insert>
+
+</mapper>

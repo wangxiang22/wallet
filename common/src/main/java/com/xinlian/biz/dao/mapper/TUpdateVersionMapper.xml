@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TUpdateVersionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TUpdateVersion">
+        <id column="id" property="id" />
+        <result column="type" property="type" />
+        <result column="version" property="version" />
+        <result column="url" property="url" />
+        <result column="startTime" property="startTime" />
+        <result column="endTime" property="endTime" />
+        <result column="forceUpdate" property="forceUpdate" />
+        <result column="status" property="status" />
+        <result column="content" property="content" />
+        <result column="thumb" property="thumb" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, type, version, url, startTime AS startTime, endTime AS endTime, forceUpdate AS forceUpdate, status, content, thumb
+    </sql>
+
+
+    <select id="queryVersion" resultMap="BaseResultMap">
+        select id,version,type,url,startTime,endTime,forceUpdate,status,content from t_update_version where status=1 and type=#{type} order by startTime desc
+    </select>
+
+	<select id="queryVersionLimit1" resultMap="BaseResultMap">
+        select id,version,type,url,startTime,endTime,forceUpdate,status,content from t_update_version where status=1 and type=#{type} order by startTime desc limit 1
+    </select>
+
+    <update id="updateStatus" parameterType="integer">
+          update t_update_version set status=0 where id=#{id}
+    </update>
+
+
+    <select id="queryVer" resultMap="BaseResultMap">
+        select id,version,type,url,startTime,endTime,forceUpdate,status,content from t_update_version where status=1 order by startTime desc
+    </select>
+
+</mapper>

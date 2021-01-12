@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TBlockmallPayCallbackErrorLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TBlockmallPayCallbackErrorLog">
+        <id column="id" property="id"/>
+        <result column="repeate_num" property="repeateNum"/>
+        <result column="callback_time" property="callbackTime"/>
+        <result column="callback" property="callback"/>
+        <result column="order_no" property="orderNo"/>
+        <result column="data" property="data"/>
+        <result column="sign" property="sign"/>
+        <result column="err_msg" property="errMsg"/>
+    </resultMap>
+
+
+</mapper>

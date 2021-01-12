@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.VendorSmsConfigMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.VendorSmsConfigModel">
+        <id column="id" property="id" />
+        <result column="option_name" property="optionName" />
+        <result column="option_value" property="optionValue" />
+        <result column="option_tipes" property="optionTipes" />
+        <result column="belongs_system_code" property="belongsSystemCode" />
+        <result column="is_show" property="isShow" />
+        <result column="sort" property="sort" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id AS id,
+        option_name,
+        option_value,
+        option_tipes,
+        belongs_system_code,
+        is_show,
+        sort
+    </sql>
+
+    <select id="querySmsConfigSystemCode" resultMap="BaseResultMap" parameterType="com.xinlian.biz.model.VendorSmsConfigModel">
+        select <include refid="Base_Column_List"/>
+        from t_vendor_sms_config
+        <where>
+            <if test="belongsSystemCode!=null and belongsSystemCode!=''">
+                and belongs_system_code= #{belongsSystemCode}
+            </if>
+            <if test="isShow!=null">
+                and is_show= #{isShow}
+            </if>
+        </where>
+    </select>
+</mapper>

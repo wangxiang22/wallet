@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TCountryDicMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TCountryDic">
+        <id column="id" property="id" />
+        <result column="en" property="en" />
+        <result column="zh" property="zh" />
+        <result column="locale" property="locale" />
+        <result column="code" property="code" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, en, zh, locale, code
+    </sql>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into t_country_dic (id, en, zh, locale, code)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id},
+            #{item.en},
+            #{item.zh},
+            #{item.locale},
+            #{item.code}
+            )
+        </foreach>
+    </insert>
+
+    <select id="getModelByCode" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select <include refid="Base_Column_List"/>
+        from t_country_dic where code = #{countryCode}
+        order by id desc limit 1
+    </select>
+</mapper>

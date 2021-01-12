@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.AdminRoleMapper">
+  <resultMap id="BaseResultMap" type="com.xinlian.biz.model.AdminRoleModel">
+    <id column="id" property="id" />
+    <result column="role_code"    property="roleCode" />
+    <result column="role_name"    property="roleName" />
+    <result column="role_status"  property="roleStatus" />
+    <result column="role_explain" property="roleExplain"/>
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, role_code, role_name, role_status,role_explain
+  </sql>
+
+  <select id="getById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    select <include refid="Base_Column_List"/>
+    from admin_role where id = #{id}
+  </select>
+
+  <select id="query" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    SELECT role.*,group_concat( usr.username) as underlingAdmin from admin_role role
+    left join admin_user_role urole on role.id = urole.role_id
+    left join admin_user usr on urole.user_id = usr.id
+    <include refid="queryWhere"/>
+    GROUP BY role.id
+  </select>
+
+  <insert id="insert" parameterType="com.xinlian.biz.model.AdminRoleModel" useGeneratedKeys="true" keyProperty="id">
+    insert into admin_role (role_code, role_name,
+      role_status,role_explain)
+    values (#{roleCode}, #{roleName},
+      'O',#{roleExplain})
+  </insert>
+
+  <delete id="delete" parameterType="java.lang.Long">
+    DELETE FROM admin_role where id = #{id}
+  </delete>
+
+  <delete id="deleteRoleMenuId" parameterType="java.lang.Long">
+   delete from admin_role_menu
+   where role_id = #{adminRoleId}
+  </delete>
+
+  <update id="update" parameterType="com.xinlian.biz.model.AdminRoleModel">
+    update admin_role
+    <set>
+      <if test="roleCode != null">
+        role_code = #{roleCode},
+      </if>
+      <if test="roleName != null">
+        role_name = #{roleName},
+      </if>
+      <if test="roleStatus != null">
+        role_status = #{roleStatus},
+      </if>
+    </set>
+    where id = #{id}
+  </update>
+  <select id="getRoleByUserId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    r.id as id , r.role_code, role_name, role_status
+    FROM admin_user u
+    left JOIN admin_user_role ur on u.id = ur.user_id
+    LEFT JOIN admin_role r on r.id = ur.role_id
+    where u.id = #{id} and r.role_status = 'O'
+  </select>
+  <sql id="queryWhere">
+    <where>
+      <if test="roleCode != null and roleCode != ''" >
+        and role_code= #{roleCode}
+      </if>
+      <if test="roleName != null and roleName != ''" >
+        and role_name like CONCAT('%',#{roleName}, '%')
+      </if>
+      <if test="roleStatus != null and roleStatus != ''" >
+        and role_status =#{roleStatus}
+      </if>
+    </where>
+  </sql>
+
+
+</mapper>

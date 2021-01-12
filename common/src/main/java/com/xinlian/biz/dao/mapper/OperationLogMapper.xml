@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xinlian.biz.dao.OperationLogMapper">
+
+    <resultMap id="OperationLogMap" type="com.xinlian.biz.model.OperationLogModel">
+        <id column="id"             property="id" jdbcType="VARCHAR"/>
+        <result column="ope_module" property="opeModule" jdbcType="VARCHAR"/>
+        <result column="ope_type"   property="opeType" jdbcType="VARCHAR"/>
+        <result column="ope_userid" property="opeUserid" jdbcType="VARCHAR"/>
+        <result column="ope_username"   property="opeUsername" jdbcType="VARCHAR"/>
+        <result column="ope_desc"       property="opeDesc"/>
+        <result column="ope_req_param"  property="opeReqParam" jdbcType="VARCHAR"/>
+        <result column="ope_resp_param" property="opeRespParam" jdbcType="TINYINT"/>
+        <result column="ope_result"     property="opeResult" jdbcType="VARCHAR"/>
+        <result column="ope_time"       property="opeTime" jdbcType="VARCHAR"/>
+        <result column="ope_log_level"  property="operationLogLevel" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Ope_Column_List">
+        id, ope_module, ope_type, ope_userid, ope_username, ope_desc, ope_req_param, ope_resp_param, ope_result, ope_time, ope_log_level
+    </sql>
+
+    <sql id="whereSql">
+        <where>
+            <if test="opeModule != null and opeModule !='' ">
+                AND ope_module = #{opeModule,jdbcType=VARCHAR}
+            </if>
+            <if test="opeUserid != null and opeUserid !='' ">
+                AND ope_userid = #{opeUserid,jdbcType=VARCHAR}
+            </if>
+            <if test="operationLogTimeStartDate != null ">
+                AND ope_time &gt;= #{operationLogTimeStartDate,jdbcType=VARCHAR}
+            </if>
+            <if test="operationLogTimeEndDate != null ">
+                AND ope_time &lt;= #{operationLogTimeEndDate,jdbcType=VARCHAR}
+            </if>
+            <if test="opeType != null and opeType !=''">
+                AND ope_type = #{opeType}
+            </if>
+        </where>
+    </sql>
+
+    <insert id="insert" parameterType="com.xinlian.biz.model.OperationLogModel"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into admin_operation_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="opeModule != null">
+                ope_module,
+            </if>
+            <if test="opeType != null">
+                ope_type,
+            </if>
+            <if test="opeUserid != null">
+                ope_userid,
+            </if>
+            <if test="opeUsername != null">
+                ope_username,
+            </if>
+            <if test="opeDesc!=null">
+                ope_desc,
+            </if>
+            <if test="opeReqParam != null">
+                ope_req_param,
+            </if>
+            <if test="opeRespParam != null">
+                ope_resp_param,
+            </if>
+            <if test="opeResult != null">
+                ope_result,
+            </if>
+
+            ope_time,
+            <if test="operationLogLevel != null">
+                ope_log_level
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="opeModule != null">
+                #{opeModule,jdbcType=VARCHAR},
+            </if>
+            <if test="opeType != null">
+                #{opeType,jdbcType=VARCHAR},
+            </if>
+            <if test="opeUserid != null">
+                #{opeUserid,jdbcType=VARCHAR},
+            </if>
+            <if test="opeUsername != null">
+                #{opeUsername,jdbcType=VARCHAR},
+            </if>
+            <if test="opeDesc != null">
+                #{opeDesc},
+            </if>
+            <if test="opeReqParam != null">
+                #{opeReqParam,jdbcType=VARCHAR},
+            </if>
+            <if test="opeRespParam != null">
+                #{opeRespParam,jdbcType=VARCHAR},
+            </if>
+            <if test="opeResult != null">
+                #{opeResult,jdbcType=VARCHAR},
+            </if>
+
+            CURRENT_TIMESTAMP ,
+            <if test="operationLogLevel != null">
+                #{operationLogLevel,jdbcType=VARCHAR}
+            </if>
+
+        </trim>
+    </insert>
+
+    <select id="query" resultMap="OperationLogMap" parameterType="com.xinlian.biz.model.OperationLogModel">
+        SELECT
+        <include refid="Ope_Column_List"/>
+        FROM admin_operation_log
+        <include refid="whereSql"/>
+        ORDER BY ope_time DESC
+    </select>
+</mapper>

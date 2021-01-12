@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TReleaseCatRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TReleaseCatRecord">
+        <id column="id" property="id" />
+        <result column="uid" property="uid" />
+        <result column="user_name" property="userName" />
+        <result column="user_login_name" property="userLoginName" />
+        <result column="mobile" property="mobile" />
+        <result column="release_cat_num" property="releaseCatNum" />
+        <result column="status" property="status" />
+        <result column="createtime" property="createtime" />
+        <result column="updatetime" property="updatetime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, uid, user_name, user_login_name, mobile, release_cat_num, status, createtime, updatetime
+    </sql>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        insert into t_release_cat_record (
+        uid,
+        user_name,
+        user_login_name,
+        mobile,
+        release_cat_num,
+        createtime)
+        values
+        <foreach collection="list" item="record" separator=",">
+            ( #{record.uid},
+            #{record.userName},
+            #{record.userLoginName},
+            #{record.mobile},
+            #{record.releaseCatNum},
+            CURRENT_TIMESTAMP )
+        </foreach>
+    </insert>
+    <!--and release_cat_num = #{groupByReleaseCatNum}-->
+    <select id="getWaitReleaseCatRecord" resultMap="BaseResultMap" parameterType="java.math.BigDecimal">
+        select <include refid="Base_Column_List"/>
+        from t_release_cat_record
+        where status = 1
+        limit 1
+    </select>
+
+    <select id="groupByReleaseCatNum" resultType="java.math.BigDecimal" >
+        select release_cat_num
+        from t_release_cat_record
+        where status = 1
+        group by release_cat_num
+    </select>
+
+    <update id="batchUpdateToProcessing" parameterType="com.xinlian.biz.model.TReleaseCatRecord">
+        update 
+        t_release_cat_record
+        set status = #{newStatus}
+        where status = #{oldStatus}
+        and id in 
+        <foreach collection="releaseCatRecordList" item="record" separator="," open="(" close=")">
+            #{record.id}
+        </foreach>
+    </update>
+
+    <select id="getWaitDisposeMiddleSet" resultType="com.xinlian.biz.model.MiddleModel">
+        select uid,trade_sum as tradeSum,currency_code as currencyCode,
+        order_id as orderId,status from t_middle
+        where status = 1 and currency_code = 'USDT' limit 1
+    </select>
+
+    <update id="updateMiddleStatus">
+        update t_middle set status = #{newStatus}
+        where
+        status = #{oldStatus} and order_id = #{orderId}
+    </update>
+
+    <delete id="deleteByKeyOrderId">
+        delete from t_wallet_trade_order
+        where id = #{orderId}
+    </delete>
+
+    <update id="updateWalletInfoBalanceNum">
+        update t_wallet_info
+        set balance_num = balance_num - #{minusDecimalValue}
+        where uid = #{uid} and currency_code = 'USDT'
+    </update>
+
+    <select id="checkLockedPositionIsUId" resultType="java.lang.Integer">
+        select count(uid) from temp_air_drop_20200317 where uid = #{uid}
+    </select>
+</mapper>

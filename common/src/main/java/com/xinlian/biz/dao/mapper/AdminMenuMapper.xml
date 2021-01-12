@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.AdminMenuMapper">
+  <resultMap id="BaseResultMap" type="com.xinlian.biz.model.AdminMenuModel">
+    <id column="id" property="id"/>
+    <result column="menu_code" property="menuCode"/>
+    <result column="menu_name" property="menuName"/>
+    <result column="menu_level"   property="menuLevel"/>
+    <result column="menu_url"     property="menuUrl"/>
+    <result column="menu_explain" property="menuExplain"/>
+    <result column="parent_menu_id" property="parentMenuId"/>
+    <result column="system_id" property="systemId"/>
+    <result column="status"    property="status"/>
+    <result column="isChecked" property="isChecked"/>
+  </resultMap>
+
+  <resultMap id="LabelMap" type="com.xinlian.biz.model.AdminMenuLabelModel">
+    <id column="id" property="id"/>
+    <result column="menu_id"       property="menuId"/>
+    <result column="menu_name"     property="menuName"/>
+    <result column="menu_url"      property="menuUrl"/>
+    <result column="label_key"     property="labelKey"/>
+    <result column="label_name"    property="labelName"/>
+    <result column="isChecked"     property="isChecked"/>
+    <result column="interface_uri" property="interfaceUri"/>
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, menu_code, menu_name, menu_level, menu_explain, menu_url, parent_menu_id, system_id, status
+  </sql>
+
+  <select id="queryMenusByRoleId" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List"/>,
+    case when t.id in
+    (select trm.menu_id as mId from admin_role_menu trm where trm.role_id = #{roleId})
+    then 'TRUE' else 'FALSE' end as isChecked from admin_menu t
+    <include refid="AllQueryWhere"/>
+  </select>
+
+  <select id="query" parameterType="com.xinlian.biz.model.AdminMenuModel" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from admin_menu
+    <include refid="AllQueryWhere"/>
+    order by parent_menu_id,menu_level,menu_index
+  </select>
+
+  <sql id="AllQueryWhere">
+    <where>
+      <if test="menuName !=null and menuName != '' ">
+        and menu_name like CONCAT ('%',#{menuName},'%')
+      </if>
+    </where>
+  </sql>
+
+  <delete id="delete" parameterType="java.lang.Long">
+    delete from admin_menu
+    where id = #{id}
+  </delete>
+
+  <insert id="insert" parameterType="com.xinlian.biz.model.AdminMenuModel">
+    insert into admin_menu (id, menu_code, menu_name,
+      menu_level, menu_url, parent_menu_id,
+      system_id, status)
+    values (#{id}, #{menuCode}, #{menuName},
+      #{menuLevel}, #{menuUrl}, #{parentMenuId},
+      #{systemId}, #{status})
+  </insert>
+
+  <insert id="batchInsertRoleMenu" parameterType="java.util.List">
+    insert into admin_role_menu (
+    role_id
+    ,menu_id
+    ,creator,
+    create_time)
+    values
+    <foreach collection="list" item="record" separator=",">
+      ( #{record.roleId}
+      ,#{record.menuId}
+      ,#{record.creator}
+      ,CURRENT_TIMESTAMP )
+    </foreach>
+  </insert>
+
+  <select id="getMenuListByRole" parameterType="com.xinlian.biz.model.AdminRoleModel" resultMap="BaseResultMap">
+    select
+    menu.id as id, menu_code, menu_name, menu_level, menu_url, parent_menu_id, system_id, status
+    from admin_role r
+    LEFT JOIN admin_role_menu umenu ON r.id = umenu.role_id
+    LEFT JOIN admin_menu menu on menu.id = umenu.menu_id
+    <include refid="queryWhereByRole"/>
+    order by menu_index asc
+  </select>
+
+  <select id="getMenuListByRoleModels" parameterType="java.util.List" resultMap="BaseResultMap">
+    select DISTINCT
+    menu.id as id, menu_code, menu_name, menu_level, menu_url, parent_menu_id, system_id,menu_index, status
+    from admin_role r
+    LEFT JOIN admin_role_menu umenu ON r.id = umenu.role_id
+    LEFT JOIN admin_menu menu on menu.id = umenu.menu_id
+    <include refid="queryWhereRoleIds"/>
+    order by menu_index asc
+  </select>
+
+  <sql id="queryWhereRoleIds">
+    <where>
+      and menu.status = 'O'
+      <if test="list != null and list.size>0">
+        and r.id in
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+          #{item.id}
+        </foreach>
+      </if>
+    </where>
+  </sql>
+  <sql id="queryWhereByRole">
+    <where>
+      and menu.status = 'O'
+      <if test="roleName != null and roleName != ''">
+        and role_name like CONCAT('%',#{roleName}, '%')
+      </if>
+      <if test="roleCode != null and roleCode != ''">
+        and role_code= #{roleCode}
+      </if>
+      <if test="roleStatus != null and roleStatus != ''">
+        and role_status =#{roleStatus}
+      </if>
+      <if test="id != null and id != ''">
+        and r.id = #{id}
+      </if>
+    </where>
+  </sql>
+
+  <!-- 菜单标签相关  -->
+  <select id="queryLabelsByMenuId" parameterType="java.lang.Long" resultMap="LabelMap">
+    select t.id,menu_id,t1.menu_name,label_name,label_key
+    from admin_permission t
+    left join admin_menu t1
+    on t.menu_id = t1.id
+    where menu_id = #{menuId}
+  </select>
+  <select id="queryLabelsByRoleId" parameterType="java.util.Map" resultMap="LabelMap">
+    select t.id,menu_id,t1.menu_name,label_name,label_key,t1.menu_url,
+    case when t.id in (select trp.perm_id from admin_role_permission trp where role_id= #{roleId})
+    then 'TRUE' else 'FLASE' end as isChecked
+    from admin_permission t
+    left join admin_menu t1
+    on t.menu_id = t1.id
+    where menu_id in (select menu_id from admin_role_menu where role_id = #{roleId})
+    <if test="menuName !=null and menuName !=''">
+      and t1.menu_name like concat('%',#{menuName},'%')
+    </if>
+    <if test="labelName !=null and labelName !='' ">
+      and label_name like concat('%',#{labelName},'%')
+    </if>
+  </select>
+
+  <!--查询所有label-->
+  <select id="queryAllLabel" parameterType="java.util.List" resultMap="LabelMap">
+    select tp.menu_id,tm.menu_name,
+    GROUP_CONCAT('{id:',tp.id,',name:',tp.label_name,'}') as groupConcatLab
+    from admin_permission tp
+    left join admin_menu tm on tm.id = tp.menu_id
+    GROUP BY tm.id
+  </select>
+
+  <insert id="insertLabel" parameterType="com.xinlian.biz.model.AdminMenuLabelModel" useGeneratedKeys="true" keyProperty="id">
+    insert into admin_permission(menu_id,label_name,label_key)
+    VALUES (#{menuId},#{labelName},#{labelKey})
+  </insert>
+  <delete id="delLabel" parameterType="java.lang.Long">
+    DELETE from admin_permission where id = #{labelId}
+  </delete>
+  <update id="updLabel" parameterType="com.xinlian.biz.model.AdminMenuLabelModel">
+    update admin_permission
+    <set>
+      <if test="labelName != null and labelName != '' ">
+        label_name = #{labelName},
+      </if>
+      <if test="labelKey != null and labelKey !='' ">
+        label_key = #{labelKey},
+      </if>
+    </set>
+    where id = #{id}
+  </update>
+
+  <select id="queryRoleAndLabels" resultType="com.xinlian.biz.model.AdminPermissionModel">
+    SELECT t1.*,t2.underlingOpeUserName
+    from (select role.id,role.role_name as roleName,
+    GROUP_CONCAT(per.label_name) as authorityDesc
+    from admin_role role
+    left join admin_role_permission roleper on role.id = roleper.role_id
+    left join admin_permission per on roleper.perm_id = per.id
+    group by role.id) t1
+    left join
+    (select role.id,role.role_name as roleName,
+    GROUP_CONCAT(usr.username) as underlingOpeUserName
+    from admin_role role
+    left join admin_user_role urole on urole.role_id = role.id
+    left join admin_user usr on usr.id = urole.user_id
+    group by role.id) t2 on t1.id = t2.id
+  </select>
+
+  <insert id="batchInsertRoleLabels" parameterType="java.util.List">
+    insert into admin_role_permission (
+    role_id
+    ,perm_id
+    ,creator
+    ,create_time)
+    values
+    <foreach collection="list" item="record" separator=",">
+      ( #{record.roleId}
+      ,#{record.permId}
+      ,#{record.creator}
+      ,CURRENT_TIMESTAMP )
+    </foreach>
+  </insert>
+  <delete id="deleteRoleLabelId" parameterType="java.lang.Long">
+    delete from admin_role_permission
+    where role_id = #{roleId}
+  </delete>
+
+  <select id="getLabelsByRoleIds" resultMap="LabelMap" parameterType="java.util.List">
+    select ap.*,menu.menu_name from admin_permission ap
+    left join admin_role_permission rp on ap.id = rp.perm_id
+    left join admin_menu menu on ap.menu_id = menu.id
+    where rp.role_id in 
+    <foreach collection="list" item="item" open="(" close=")" separator=",">
+      #{item.id}
+    </foreach>
+  </select>
+</mapper>

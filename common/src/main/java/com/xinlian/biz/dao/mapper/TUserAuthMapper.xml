@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TUserAuthMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TUserAuth">
+        <id column="id" property="id"/>
+        <result column="uid" property="uid"/>
+        <result column="username" property="username"/>
+        <result column="auth_sn" property="authSn"/>
+        <result column="input_ip" property="inputIp"/>
+        <result column="input_time" property="inputTime"/>
+        <result column="euid" property="euid"/>
+        <result column="editor" property="editor"/>
+        <result column="note" property="note"/>
+        <result column="status" property="status"/>
+        <result column="auth_sfzfm" property="authSfzfm"/>
+        <result column="auth_sfzzm" property="authSfzzm"/>
+        <result column="auth_scsfz" property="authScsfz"/>
+        <result column="count" property="count"/>
+        <result column="from" property="from"/>
+        <result column="real_name" property="realName"/>
+        <result column="edit_time" property="editTime"/>
+        <result column="server_node_id" property="node"/>
+        <result column="orem_state" property="oremState"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, uid, username, auth_sn, input_ip, input_time, euid, editor, note, status, auth_sfzfm, auth_sfzzm, auth_scsfz, count, from, real_name, edit_time
+    </sql>
+
+    <select id="queryAll" resultMap="BaseResultMap" parameterType="com.xinlian.common.request.UserAuthQueryReq">
+        select
+        ua.uid,ua.username,ua.real_name,ua.editor,ua.edit_time,
+        ui.server_node_id,ui.server_node_name as nodeName,ui.orem_state,
+        ua.from,
+        ua.auth_sn,ua.auth_sfzfm,
+        ua.auth_sfzzm, ua.auth_scsfz,
+        ua.input_time,ua.status,ui.mobile,ua.note,ua.uid
+        from
+        t_user_auth ua
+        JOIN t_user_info ui
+        ON ua.uid=ui.uid
+        <where>
+            <if test="from!=null and from != 0 ">
+                and ua.from = #{from}
+            </if>
+            <if test="username!=null and username != '' ">
+                and ua.username like concat(#{username},'%')
+            </if>
+            <if test="uid!=null and uid != '' ">
+                and ua.uid = #{uid}
+            </if>
+            <if test="realName!=null and realName != '' ">
+                and ua.real_name like concat('%',#{realName},'%')
+            </if>
+            <if test="authSn!=null and authSn!=''">
+                and ua.auth_sn = #{authSn}
+            </if>
+            <if test="node!=null and node != '' ">
+                and ui.server_node_id=#{node}
+            </if>
+            <if test="status!=null and status != '' ">
+                and ua.status=#{status}
+            </if>
+            <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                and ua.input_time between #{startTime} and #{endTime}
+            </if>
+        </where>
+        GROUP BY ua.id desc
+        limit #{pageNum},#{pageNum2}
+    </select>
+
+    <select id="getUserAuthingCount" resultType="java.lang.Integer" parameterType="java.lang.String">
+        select count(1) from t_user_auth where auth_sn = #{authSn} and status in (1,3)
+    </select>
+
+    <select id="queryCount"  resultType="int" parameterType="com.xinlian.biz.model.TUserAuth">
+        select
+        count(0)
+        from
+        t_user_auth ua
+        JOIN t_user_info ui
+        ON ua.uid=ui.uid
+        <where>
+            <if test="from!=null and from != 0 ">
+                and ua.from = #{from}
+            </if>
+            <if test="username!=null and username != '' ">
+                and ua.username like concat(#{username},'%')
+            </if>
+            <if test="realName!=null and realName != '' ">
+                and ua.real_name like concat('%',#{realName},'%')
+            </if>
+            <if test="authSn!=null and authSn!=''">
+                and ua.auth_sn = #{authSn}
+            </if>
+            <if test="uid!=null and uid != '' ">
+                and ua.uid = #{uid}
+            </if>
+            <if test="node!=null and node != '' ">
+                and ui.server_node_id=#{node}
+            </if>
+            <if test="status!=null and status != '' ">
+                and ua.status=#{status}
+            </if>
+            <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                and ua.input_time between #{startTime} and #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <update id="takeOffer" parameterType="java.util.List">
+        update t_user_auth set status=3 where uid in <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">#{item}</foreach>
+    </update>
+
+    <update id="refuse" parameterType="java.util.List">
+        update t_user_auth set status=2 where uid in <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">#{item}</foreach>
+    </update>
+
+    <update id="updateByUid" parameterType="com.xinlian.common.request.UserAuthUpdateReq">
+        update t_user_auth tua,t_user_info tui set tui.mobile =#{tel},tua.note=#{note},tua.real_name=#{realName},tua.auth_sn=#{authSn},
+                tua.auth_sfzzm = #{sfzzm},tua.auth_sfzfm = #{sfzfm},tua.auth_scsfz = #{scsfz}
+         where tua.uid=tui.uid and tui.uid = #{uid}
+    </update>
+
+    <update id="updateByStatus">
+        update t_user_auth set status = 1 where uid =#{uid} and status = 2
+    </update>
+
+    <select id="checkUserAuth" resultMap="BaseResultMap">
+        select * from t_user_auth where uid = #{uid}
+    </select>
+
+    <select id="getNotBelongAlexandriaCount" resultType="java.lang.Integer">
+        select count(1)
+        from t_user_auth as ua
+        left join t_user_info as ui on ua.uid= ui.uid
+        where ua.auth_sn = #{authSn} and ui.server_node_id != 110 and ua.status in (1,3)
+    </select>
+
+    <select id="getSameNodeAuthCount" resultType="java.lang.Integer">
+        select count(1)
+        from t_user_auth as ua
+        left join t_user_info as ui on ua.uid= ui.uid
+        where ua.auth_sn = #{authSn} and ui.server_node_id = #{nodeId} and ua.status in (1,3)
+    </select>
+
+    <select id="findActiveNotAuthList" resultType="java.lang.Long">
+        select tui.uid
+        from t_user_info as tui
+        left join t_user_auth as tua on tui.uid = tua.uid
+        where tui.uid = #{uid} and tui.orem_state = 1 and (tua.uid is null or tua.status = 2)
+    </select>
+
+    <select id="findUidListByAuthSn" resultType="java.lang.String">
+        select concat(uid,'') from t_user_auth where auth_sn =
+        (select auth_sn from t_user_auth where uid = #{uid} and status = 3) and status = 3
+    </select>
+
+    <select id="queryAuthStatusByUid" resultType="java.lang.Integer">
+        select count(uid) from t_user_auth auth where auth.uid = #{uid} and auth.status = 3
+    </select>
+
+    <select id="findUidListByStatus" resultType="com.xinlian.common.dto.UserUidAuthSnDto">
+        select ua.uid as uid,ua.auth_sn as authSn,ua.auth_scsfz as authScsfz
+        from t_user_auth as ua where ua.status = 2 and ua.from = 1 and ua.input_time &gt;= '1597377600' and ua.input_time &lt;= '1597852799'
+        order by ua.id asc
+    </select>
+
+    <select id="findActiveNotAuth" resultType="java.lang.Long">
+        select tui.uid
+        from t_user_info as tui
+        left join t_user_auth as tua on tui.uid = tua.uid
+        where tui.uid = #{uid} and tui.orem_state = 1 and tua.status in (1,2)
+    </select>
+</mapper>

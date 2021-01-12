@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TLikeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TLike">
+        <id column="id" property="id" />
+        <result column="uid" property="uid" />
+        <result column="nid" property="nid" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, uid, nid, status
+    </sql>
+
+
+    <select id="queryLike" resultMap="BaseResultMap">
+        select id,uid,nid,status from t_like where uid=#{uid} and nid=#{nid}
+    </select>
+
+    <insert id="insertLike1" parameterType="integer">
+        INSERT INTO t_like (uid, nid,status) VALUES (#{uid}, #{nid},1)
+    </insert>
+
+    <insert id="insertLike" parameterType="integer">
+        INSERT INTO t_like (uid, nid,status) VALUES (#{uid}, #{nid},0)
+    </insert>
+
+    <update id="updateLikeStatus" parameterType="integer">
+        update t_like set status=0 where uid=#{uid} and nid=#{nid}
+    </update>
+
+    <update id="updateLike" parameterType="integer">
+        update t_like set status=1 where uid=#{uid} and nid=#{nid}
+    </update>
+    
+</mapper>

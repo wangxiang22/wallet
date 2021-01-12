@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TUserExchangeWalletMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TRocketBind">
+        <id column="id" property="id" />
+        <result column="cat_uid" property="catUid" />
+        <result column="rocket_uid" property="rocketUid" />
+        <result column="state" property="state" />
+        <result column="create_time" property="createTime" />
+        <result column="cat_username" property="catUsername" />
+        <result column="cat_phone" property="catPhone" />
+        <result column="cat_realname" property="catRealname" />
+        <result column="cat_cardno" property="catCardno" />
+        <result column="rocket_username" property="rocketUsername" />
+        <result column="rocket_email" property="rocketEmail" />
+        <result column="rocket_realname" property="rocketRealname" />
+        <result column="rocket_phone" property="rocketPhone" />
+        <result column="rocket_card" property="rocketCard" />
+        <result column="system_name" property="systemName" />
+        <result column="active" property="active" />
+        <result column="server_node_id" property="systemType" />
+        <result column="server_node_name" property="systemName" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, cat_uid, rocket_uid, status, create_time, cat_username, cat_phone, cat_realname, cat_cardno, rocket_username, rocket_email, rocket_realname, rocket_card, system_type, system_name, active
+    </sql>
+    <select id="queryAllRecord" resultMap="BaseResultMap" parameterType="com.xinlian.common.request.FindExchangeBindStateReq">
+        select * from t_rocket_bind ua
+        JOIN t_user_info ui
+        ON ua.cat_uid=ui.uid
+        where
+        ua.id in(SELECT MAX(t.id) FROM `t_rocket_bind` t GROUP BY cat_uid)
+            <if test="userName!=null and userName != '' ">
+                and ua.cat_username like concat('%',#{userName},'%')
+            </if>
+            <if test="uid!=null and uid != '' ">
+                and ua.cat_uid =#{uid}
+            </if>
+            <if test="node!=null and node != '' ">
+                and ui.server_node_id=#{node}
+            </if>
+            <if test="phone!=null and phone != '' ">
+                and ua.cat_phone=#{phone}
+            </if>
+            <if test="rocketPhone!=null and rocketPhone != '' ">
+                and ua.rocket_phone=#{rocketPhone}
+            </if>
+            <if test="rocketUid!=null and rocketUid != '' ">
+                and ua.rocket_uid=#{rocketUid}
+            </if>
+        limit #{pageNum},#{pageNum2}
+    </select>
+
+    <select id="queryAllRecordCount" resultType="int" parameterType="com.xinlian.common.request.FindExchangeBindStateReq">
+        select count(temp.id) from(select ua.id from t_rocket_bind ua
+        JOIN t_user_info ui
+        ON ua.cat_uid=ui.uid
+        <where>
+            <if test="userName!=null and userName != '' ">
+                and ua.cat_username like concat('%',#{userName},'%')
+            </if>
+            <if test="uid!=null and uid != '' ">
+                and ua.cat_uid =#{uid}
+            </if>
+            <if test="node!=null and node != '' ">
+                and ui.server_node_id=#{node}
+            </if>
+            <if test="phone!=null and phone != '' ">
+                and ua.cat_phone=#{phone}
+            </if>
+            <if test="rocketPhone!=null and rocketPhone != '' ">
+                and ua.rocket_phone=#{rocketPhone}
+            </if>
+            <if test="rocketUid!=null and rocketUid != '' ">
+                and ua.rocket_uid=#{rocketUid}
+            </if>
+        </where>
+        group by ua.cat_uid) as temp
+    </select>
+
+
+    <select id="findExchangeWalletBindState" resultMap="BaseResultMap" parameterType="com.xinlian.common.request.FindExchangeBindStateReq">
+        select * from t_rocket_bind ua
+        JOIN t_user_info ui
+        ON ua.cat_uid=ui.uid
+        <where>
+            <if test="userName!=null and userName != '' ">
+                and ua.cat_username like concat('%',#{userName},'%')
+            </if>
+            <if test="uid!=null and uid != '' ">
+                and ua.cat_uid =#{uid}
+            </if>
+            <if test="node!=null and node != '' ">
+                and ui.server_node_id=#{node}
+            </if>
+            <if test="phone!=null and phone != '' ">
+                and ua.cat_phone=#{phone}
+            </if>
+            <if test="rocketPhone!=null and rocketPhone != '' ">
+                and ua.rocket_phone=#{rocketPhone}
+            </if>
+            <if test="rocketUid!=null and rocketUid != '' ">
+                and ua.rocket_uid=#{rocketUid}
+            </if>
+        </where>
+        order by ua.create_time desc
+        limit #{pageNum},#{pageNum2}
+    </select>
+
+    <select id="queryCount" resultType="int" parameterType="com.xinlian.common.request.FindExchangeBindStateReq">
+        select count(0) from t_rocket_bind ua
+        JOIN t_user_info ui
+        ON ua.cat_uid=ui.uid
+        <where>
+            <if test="userName!=null and userName != '' ">
+                and ua.cat_username like concat('%',#{userName},'%')
+            </if>
+            <if test="uid!=null and uid != '' ">
+                and ua.cat_uid =#{uid}
+            </if>
+            <if test="node!=null and node != '' ">
+                and ui.server_node_id=#{node}
+            </if>
+            <if test="phone!=null and phone != '' ">
+                and ua.cat_phone=#{phone}
+            </if>
+            <if test="rocketPhone!=null and rocketPhone != '' ">
+                and ua.rocket_phone=#{rocketPhone}
+            </if>
+            <if test="rocketUid!=null and rocketUid != '' ">
+                and ua.rocket_uid=#{rocketUid}
+            </if>
+        </where>
+    </select>
+
+</mapper>

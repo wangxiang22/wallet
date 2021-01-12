@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TOrderMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TOrder">
+        <id column="id" property="id"/>
+        <result column="order_id" property="orderId"/>
+        <result column="seller_uid" property="sellerUid"/>
+        <result column="seller_username" property="sellerUsername"/>
+        <result column="seller_phone" property="sellerPhone"/>
+        <result column="buyer_uid" property="buyerUid"/>
+        <result column="buyer_username" property="buyerUsername"/>
+        <result column="buyer_phone" property="buyerPhone"/>
+        <result column="amount" property="amount"/>
+        <result column="price" property="price"/>
+        <result column="total" property="total"/>
+        <result column="seller_addr" property="sellerAddr"/>
+        <result column="buyer_addr" property="buyerAddr"/>
+        <result column="state" property="state"/>
+        <result column="create_time" property="createTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="cag_fee" property="cagFee"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id AS id, order_id AS orderId, seller_uid AS sellerUid, buyer_uid AS buyerUid, amount AS amount, price AS price, total AS total, seller_addr AS sellerAddr, buyer_addr AS buyerAddr, state AS state, create_time AS createTime, end_time AS endTime
+    </sql>
+
+    <select id="queryOneByUid" resultMap="BaseResultMap" parameterType="com.xinlian.common.request.OrderStateReq">
+        select * from t_order where seller_uid = #{uid} order by create_time desc limit 1
+    </select>
+
+    <select id="queryOutTimeOrders" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select * from t_order where create_time+#{orderTimeOutL} &lt; #{nowTime} and state = 0
+    </select>
+
+    <select id="checkUserTodaySellAmount" resultType="java.math.BigDecimal" parameterType="java.lang.Long">
+        SELECT SUM(amount) FROM `t_order` where seller_uid = #{uid} and create_time &lt; #{todayEndTime} and create_time &gt; #{todayStartTime} and state =2
+    </select>
+
+    <select id="queryEveryOrderList" resultMap="BaseResultMap"
+            parameterType="com.xinlian.common.request.QuerySpotInfoReq">
+        select * from t_order
+        <where>
+            <if test="orderId !=null and orderId !=''">
+                and order_id = #{orderId}
+            </if>
+            <if test="uid !=null">
+                and (seller_uid = #{uid} or buyer_uid = #{uid})
+            </if>
+            <if test="username !=null and username !=''">
+                and (seller_username = #{username} or buyer_username = #{username})
+            </if>
+            <if test="phone !=null and phone !=''">
+                and (seller_phone = #{phone} or buyer_phone = #{phone})
+            </if>
+            <if test="startTime !=null">
+                and end_time &gt; #{startTime}
+            </if>
+            <if test="endTime !=null">
+                and end_time &lt; #{endTime}
+            </if>
+            <if test="state ==null">
+                and (state = 1 or state = 2)
+            </if>
+            <if test="state !=null">
+                and state = #{state}
+            </if>
+            order by id desc
+            limit #{start},#{pageSize}
+        </where>
+    </select>
+
+    <select id="queryEveryOrderListCount" parameterType="com.xinlian.common.request.QuerySpotInfoReq" resultType="int">
+        select count(*) from t_order
+        <where>
+            <if test="orderId !=null and orderId !=''">
+                and order_id = #{orderId}
+            </if>
+            <if test="uid !=null">
+                and (seller_uid = #{uid} or buyer_uid = #{uid})
+            </if>
+            <if test="username !=null and username !=''">
+                and (seller_username = #{username} or buyer_username = #{username})
+            </if>
+            <if test="phone !=null and phone !=''">
+                and (seller_phone = #{phone} or buyer_phone = #{phone})
+            </if>
+            <if test="startTime !=null">
+                and end_time &gt; #{startTime}
+            </if>
+            <if test="endTime !=null">
+                and end_time &lt; #{endTime}
+            </if>
+            <if test="state ==null">
+                and (state = 1 or state = 2)
+            </if>
+            <if test="state !=null">
+                and state = #{state}
+            </if>
+        </where>
+    </select>
+
+    <select id="exportQueryEveryOrderList" parameterType="com.xinlian.common.request.QuerySpotInfoReq" resultMap="BaseResultMap">
+        select * from t_order
+        <where>
+            <if test="orderId !=null and orderId !=''">
+                and order_id = #{orderId}
+            </if>
+            <if test="uid !=null">
+                and (seller_uid = #{uid} or buyer_uid = #{uid})
+            </if>
+            <if test="username !=null and username !=''">
+                and (seller_username = #{username} or buyer_username = #{username})
+            </if>
+            <if test="phone !=null and phone !=''">
+                and (seller_phone = #{phone} or buyer_phone = #{phone})
+            </if>
+            <if test="startTime !=null">
+                and end_time &gt; #{startTime}
+            </if>
+            <if test="endTime !=null">
+                and end_time &lt; #{endTime}
+            </if>
+            <if test="state ==null">
+                and state = 1 or state = 2
+            </if>
+            <if test="state !=null">
+                and state = #{state}
+            </if>
+        </where>
+        order by id desc
+
+    </select>
+
+    <select id="completeSmartContractOrders" resultType="com.xinlian.biz.model.TSmartContractHistoryBill">
+        select
+        sum(amount) AS sellerTodayOutAmount,sum(total) AS sellerTodayInAmount ,
+        sum(amount) AS buyerTodayInAmount,  sum(total) AS buyerTodayOutAmount
+        from t_order
+        where state = 2 and create_time &gt;= #{startTime} and end_time &lt;= #{endTime}
+    </select>
+
+    <select id="usdtSoldPrice" resultMap="BaseResultMap" >
+        select
+        sum(amount) AS amount,
+        sum(total)  AS total
+        from t_order
+        where state = 2
+    </select>
+
+    <select id="smartContractUsdtPriceInTime" resultType="com.xinlian.common.response.SmartContractHisBillResponse">
+        select hour(FROM_UNIXTIME(create_time/1000,'%Y-%m-%d %H-%i-%s')) as dateStr,
+        FORMAT(SUM(total)/sum(amount),4) as usdtPrice
+        from t_order
+        where state = 2 and create_time &gt;= #{startTime} and end_time &lt;= #{endTime}
+        GROUP BY hour(FROM_UNIXTIME(create_time/1000,'%Y-%m-%d %H-%i-%s'))
+    </select>
+</mapper>

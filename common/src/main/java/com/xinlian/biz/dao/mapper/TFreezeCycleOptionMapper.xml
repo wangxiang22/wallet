@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TFreezeCycleOptionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TFreezeCycleOption">
+        <id column="id" property="id" />
+        <result column="freeze_type_code" property="freezeTypeCode" />
+        <result column="freeze_cycle" property="freezeCycle" />
+        <result column="freeze_amount" property="freezeAmount" />
+        <result column="freeze_note" property="freezeNote" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, freeze_type_code, freeze_cycle, freeze_amount, freeze_note
+    </sql>
+
+</mapper>

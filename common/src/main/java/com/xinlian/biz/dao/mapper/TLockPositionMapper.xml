@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TLockPositionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TLockPosition">
+        <id column="id" property="id" />
+        <result column="uid" property="uid" />
+        <result column="node_id" property="nodeId" />
+        <result column="usdt_amount" property="usdtAmount" />
+        <result column="cat_amount" property="catAmount" />
+        <result column="amount_code" property="amountCode" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, uid, node_id, usdt_amount, cat_amount, amount_code, create_time, update_time
+    </sql>
+
+</mapper>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TWithdrawTradeSuccessLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TWithdrawTradeSuccessLog">
+        <id column="id" property="id" />
+        <result column="uid" property="uid" />
+        <result column="currency_id" property="currencyId" />
+        <result column="currency_code" property="currencyCode" />
+        <result column="counter_party_uid" property="counterPartyUid" />
+        <result column="trade_address" property="tradeAddress" />
+        <result column="trade_currency_num" property="tradeCurrencyNum" />
+        <result column="des" property="des" />
+        <result column="tx_id" property="txId" />
+        <result column="create_time" property="createTime" />
+        <result column="unique_code" property="uniqueCode" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id AS id, uid AS uid, currency_id AS currencyId, currency_code AS currencyCode, counter_party_uid AS counterPartyUid, trade_address AS tradeAddress, trade_currency_num AS tradeCurrencyNum, des AS des, tx_id AS txId, create_time AS createTime, unique_code AS uniqueCode
+    </sql>
+
+
+    <select id="queryTradeSuccessLogList" resultType="com.xinlian.biz.model.TWithdrawTradeSuccessLog">
+        select id as id, uid as uid, currency_id as currencyId, currency_code as currencyCode, counter_party_uid as counterPartyUid,
+               trade_address as tradeAddress, trade_currency_num as tradeCurrencyNum, des as des, tx_id as txId, create_time as createTime,
+               unique_code as uniqueCode
+        from t_withdraw_trade_success_log
+        <where>
+            1=1
+            <if test="uid != null">
+                and uid = #{uid}
+            </if>
+            <if test="currencyCode != null and currencyCode != ''">
+                and currency_code = #{currencyCode}
+            </if>
+            <if test="tradeAddress != null and tradeAddress != ''">
+                and trade_address = #{tradeAddress}
+            </if>
+            <if test="startTime !=null and startTime != ''">
+                and create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime !=null and endTime != ''">
+                and create_time &lt;= #{endTime}
+            </if>
+        </where>
+        order by id desc
+        limit #{startIndex},#{pageSize}
+    </select>
+
+
+    <select id="queryTradeSuccessLogListCount" resultType="java.lang.Long">
+        select count(1) from t_withdraw_trade_success_log
+        <where>
+            1=1
+            <if test="uid != null">
+                and uid = #{uid}
+            </if>
+            <if test="currencyCode != null and currencyCode != ''">
+                and currency_code = #{currencyCode}
+            </if>
+            <if test="tradeAddress != null and tradeAddress != ''">
+                and trade_address = #{tradeAddress}
+            </if>
+            <if test="startTime !=null and startTime != ''">
+                and create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime !=null and endTime != ''">
+                and create_time &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="queryTradeSuccessTriggerList" resultType="com.xinlian.biz.model.TWithdrawTradeSuccessLog">
+        select id as id, uid as uid, currency_id as currencyId, currency_code as currencyCode, counter_party_uid as counterPartyUid,
+        trade_address as tradeAddress, trade_currency_num as tradeCurrencyNum, des as des, tx_id as txId, create_time as createTime,
+        unique_code as uniqueCode
+        from t_withdraw_trade_success_log
+        <where>
+            1=1
+            <if test="startTime !=null and startTime != ''">
+                and create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime !=null and endTime != ''">
+                and create_time &lt;= #{endTime}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+</mapper>

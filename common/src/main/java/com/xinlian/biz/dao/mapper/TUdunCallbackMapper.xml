@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TUdunCallbackMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TUdunCallback">
+        <id column="id" property="id" />
+        <result column="address" property="address" />
+        <result column="amount" property="amount" />
+        <result column="fee" property="fee" />
+        <result column="decimals" property="decimals" />
+        <result column="coinType" property="coinType" />
+        <result column="mainCoinType" property="mainCoinType" />
+        <result column="businessId" property="businessId" />
+        <result column="blockHigh" property="blockHigh" />
+        <result column="status" property="status" />
+        <result column="tradeId" property="tradeId" />
+        <result column="tradeType" property="tradeType" />
+        <result column="txid" property="txid" />
+        <result column="memo" property="memo" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, address, amount, fee, decimals, coinType AS coinType, mainCoinType AS mainCoinType, businessId AS businessId, blockHigh AS blockHigh, status, tradeId AS tradeId, tradeType AS tradeType, txid, memo, create_time
+    </sql>
+
+</mapper>

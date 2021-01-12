@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.AdminOptionsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.AdminOptions">
+        <id column="id" property="id" />
+        <result column="option_name"  property="optionName" />
+        <result column="option_value" property="optionValue" />
+        <result column="option_tipes" property="optionTipes" />
+        <result column="belongs_system_code" property="belongsSystemCode"/>
+        <result column="is_show"      property="isShow"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, option_name, option_value, option_tipes,belongs_system_code,is_show
+    </sql>
+
+
+    <select id="getAdminOptionValueByKey" parameterType="java.lang.String" resultType="java.lang.String">
+        select option_value from admin_options where option_name = #{optionName} limit 1
+    </select>
+
+    <select id="queryByBelongsSystemCode" resultMap="BaseResultMap" parameterType="com.xinlian.biz.model.AdminOptions">
+        select <include refid="Base_Column_List"/>
+        from admin_options
+        <where>
+            <if test="belongsSystemCode!=null and belongsSystemCode!=''">
+                and belongs_system_code= #{belongsSystemCode}
+            </if>
+            <if test="isShow!=null">
+                and is_show= #{isShow}
+            </if>
+        </where>
+    </select>
+    
+    <select id="queryByBelongsSystemCodeLimit1" resultMap="BaseResultMap" parameterType="com.xinlian.biz.model.AdminOptions">
+        select <include refid="Base_Column_List"/>
+        from admin_options
+        <where>
+            <if test="belongsSystemCode!=null and belongsSystemCode!=''">
+                and belongs_system_code= #{belongsSystemCode}
+            </if>
+            <if test="isShow!=null">
+                and is_show= #{isShow}
+            </if>
+        </where>
+        limit 1
+    </select>
+
+    <update id="batchUpdateModel" parameterType="com.xinlian.biz.model.AdminOptions">
+        <foreach collection="list" item="record" separator=";" open="" close="">
+            update admin_options
+            <set>
+             option_value = #{record.optionValue}
+            </set>
+            where belongs_system_code = #{record.belongsSystemCode} and option_name = #{record.optionName}
+        </foreach>
+    </update>
+
+</mapper>

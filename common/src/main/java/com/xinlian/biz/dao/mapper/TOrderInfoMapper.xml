@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TOrderInfoMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TOrderInfo">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="phone" property="phone"/>
+        <result column="amount" property="amount"/>
+        <result column="price" property="price"/>
+        <result column="total" property="total"/>
+        <result column="order_id" property="orderId"/>
+        <result column="end_time" property="endTime"/>
+        <result column="cat" property="cat"/>
+        <result column="usdt" property="usdt"/>
+        <result column="addr" property="addr"/>
+        <result column="trade_type" property="tradeType"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id AS id, username AS username, phone AS phone, amount AS amount, price AS price, total AS total, order_id AS orderId, end_time AS endTime, cat AS cat, usdt AS usdt, addr AS addr, trade_type AS tradeType
+    </sql>
+
+    <select id="querySpotInfo" resultMap="BaseResultMap" parameterType="com.xinlian.common.request.QuerySpotInfoReq">
+        select * from t_order_info
+        <where>
+            <if test="orderId !=null and orderId !=''">
+                and order_id =#{orderId}
+            </if>
+            <if test="uid !=null and uid !=''">
+                and uid =#{uid}
+            </if>
+            <if test="username !=null and username !=''">
+                and username =#{username}
+            </if>
+            <if test="phone !=null and phone !=''">
+                and phone =#{phone}
+            </if>
+            <if test="type !=null ">
+                and trade_type =#{type}
+            </if>
+            <if test="startTime !=null ">
+                and end_time &gt; #{startTime}
+            </if>
+            <if test="endTime !=null ">
+                and end_time &lt; #{endTime}
+            </if>
+        </where>
+        order by id desc
+        limit #{start},#{pageSize}
+    </select>
+
+    <select id="exportSpotInfo" resultMap="BaseResultMap" parameterType="com.xinlian.common.request.QuerySpotInfoReq">
+        select * from t_order_info
+        <where>
+            <if test="orderId !=null and orderId !=''">
+                and order_id =#{orderId}
+            </if>
+            <if test="uid !=null and uid !=''">
+                and uid =#{uid}
+            </if>
+            <if test="username !=null and username !=''">
+                and username =#{username}
+            </if>
+            <if test="phone !=null and phone !=''">
+                and phone =#{phone}
+            </if>
+            <if test="type !=null ">
+                and trade_type =#{type}
+            </if>
+            <if test="startTime !=null ">
+                and end_time &gt; #{startTime}
+            </if>
+            <if test="endTime !=null ">
+                and end_time &lt; #{endTime}
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="querySpotInfoCount" resultType="int" parameterType="com.xinlian.common.request.QuerySpotInfoReq">
+        select count(*) from t_order_info
+        <where>
+            <if test="orderId !=null and orderId !=''">
+                and order_id =#{orderId}
+            </if>
+            <if test="uid !=null and uid !=''">
+                and uid =#{uid}
+            </if>
+            <if test="username !=null and username !=''">
+                and username =#{username}
+            </if>
+            <if test="phone !=null and phone !=''">
+                and phone =#{phone}
+            </if>
+            <if test="type !=null ">
+                and trade_type =#{type}
+            </if>
+            <if test="startTime !=null ">
+                and end_time &gt; #{startTime}
+            </if>
+            <if test="endTime !=null ">
+                and end_time &lt; #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <select id="findRealTimeOrderInfoPage" resultType="com.xinlian.common.dto.OrderInfoRealTimeDto">
+        select oia.end_time as orderTime,oia.order_id as orderId,oia.amount as sellerOutAmount,
+               oia.total as sellerInTotal,oib.total as buyerOutTotal,oib.amount as buyerInAmount
+        from t_order_info as oia
+        left join t_order_info as oib on oia.order_id = oib.order_id
+        <where>
+            oia.trade_type = 1 and oib.trade_type = 0
+            <if test="orderId !=null and orderId !=''">
+                and oia.order_id = #{orderId}
+            </if>
+            <if test="startSearchTime !=null ">
+                and oia.end_time &gt;= #{startSearchTime}
+            </if>
+            <if test="endSearchTime !=null ">
+                and oia.end_time &lt;= #{endSearchTime}
+            </if>
+        </where>
+        order by oia.end_time desc
+    </select>
+
+    <select id="findSellerBuyerAltogether" resultType="com.xinlian.common.dto.OrderInfoTotalAmountDto">
+        select sum(oia.amount) as sellerAltogetherOutAmount,sum(oia.total) as sellerAltogetherInTotal,
+               sum(oib.total) as buyerAltogetherOutTotal,sum(oib.amount) as buyerAltogetherInAmount
+        from t_order_info as oia
+        left join t_order_info as oib on oia.order_id = oib.order_id
+        <where>
+            oia.trade_type = 1 and oib.trade_type = 0
+            <if test="startSearchTime !=null ">
+                and oia.end_time &gt;= #{startSearchTime}
+            </if>
+            <if test="endSearchTime !=null ">
+                and oia.end_time &lt;= #{endSearchTime}
+            </if>
+        </where>
+    </select>
+</mapper>

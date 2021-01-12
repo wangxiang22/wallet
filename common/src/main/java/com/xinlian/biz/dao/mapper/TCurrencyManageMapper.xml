@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TCurrencyManageMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TCurrencyManage">
+        <id column="id" property="id" />
+        <result column="currency_id" property="currencyId" />
+        <result column="coinname" property="coinname" />
+        <result column="icon" property="icon" />
+        <result column="cash_fee" property="cashFee" />
+        <result column="cashfee_status" property="cashfeeStatus" />
+        <result column="cashfee_min" property="cashfeeMin" />
+        <result column="inside_trade_fee" property="insideTradeFee" />
+        <result column="inside_trade_status" property="insideTradeStatus" />
+        <result column="inside_trade_min" property="insideTradeMin" />
+        <result column="cash" property="cash" />
+        <result column="recharge" property="recharge" />
+        <result column="orderbys" property="orderbys" />
+        <result column="status" property="status" />
+        <result column="recharge_address" property="rechargeAddress" />
+        <result column="cash_fee_currency_id" property="cashFeeCurrencyId" />
+        <result column="convert_fee_currency_id" property="convertFeeCurrencyId" />
+        <result column="username" property="username" />
+        <result column="password" property="password" />
+        <result column="nodeurl" property="nodeurl" />
+        <result column="isintertr" property="isintertr" />
+        <result column="create_time" property="createTime" />
+        <result column="creator" property="creator" />
+        <result column="update_time" property="updateTime" />
+        <result column="updator" property="updator" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, currency_id, coinname, icon, cash_fee, cashfee_status, cashfee_min, inside_trade_fee, inside_trade_status, inside_trade_min, cash, recharge, orderbys, status, recharge_address, cash_fee_currency_id, convert_fee_currency_id, username, password, nodeurl, isintertr, create_time, creator, update_time, updator
+    </sql>
+
+    <select id="getCurrencyManageByCurrencyAddress" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select currency_manage.* from
+        t_wallet_info wallet
+        RIGHT join t_currency_manage currency_manage on wallet.currency_id = currency_manage.currency_id
+        where wallet.currency_address = #{currencyAddress} ;
+    </select>
+
+    <select id="getCurrencyManageByCurrencyId" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select <include refid="Base_Column_List"/>
+        from t_currency_manage currency_manage
+        where currency_manage.currency_id = #{currencyId}
+        limit 1;
+    </select>
+
+    <select id="queryBalance" resultType="com.xinlian.biz.model.CurrencyStateBalance" parameterType="com.xinlian.biz.model.UserCurrencyStateReq">
+        select tcm.ex_to_wallet exToWallet ,
+        tcm.wallet_to_ex walletToEx,
+        twi.balance_num balanceNum
+        from t_currency_manage tcm
+        JOIN t_wallet_info twi
+        ON tcm.currency_id = twi.currency_id
+        where twi.uid=#{uid} and tcm.currency_id =#{currencyId}
+    </select>
+
+</mapper>

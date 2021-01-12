@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TOnlineCumulativeDurationMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TOnlineCumulativeDuration">
+        <id column="id" property="id"/>
+        <result column="uid" property="uid"/>
+        <result column="date" property="date"/>
+        <result column="last_time" property="lastTime"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, uid, date, last_time
+    </sql>
+
+    <select id="userTotalDurations" resultType="com.xinlian.common.response.UserTotalDurationVo">
+        select uid,sum(last_time) as totalDuration from t_online_cumulative_duration group by uid
+    </select>
+
+    <select id="getUidRelatedUsername" resultType="com.xinlian.common.response.UidRelatedUsernameVO">
+        select
+            t1.uid as uid,ifnull(t2.user_name,'UNKNOWN') as username
+        from
+            t_online_cumulative_duration t1
+            left join t_user_info t2 on t1.uid = t2.uid
+            group by t1.uid
+    </select>
+
+    <select id="sortTotalDurationRankList" resultType="com.xinlian.common.response.OnlineRankVO">
+        select uid,sum(last_time) as lastTime from t_online_cumulative_duration group by uid order by lastTime desc limit 50
+    </select>
+
+    <select id="findUsernameByUidSet" resultType="com.xinlian.common.response.UidRelatedUsernameVO">
+        select
+            uid,user_name as username
+        from t_user_info
+        where
+            uid in
+        <foreach collection="withoutNameUidSet" item="uid" open="(" separator="," close=")">
+            #{uid}
+        </foreach>
+    </select>
+
+
+</mapper>

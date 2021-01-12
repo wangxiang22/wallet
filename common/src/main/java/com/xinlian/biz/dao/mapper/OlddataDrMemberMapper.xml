@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.OlddataDrMemberMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.OlddataDrMember">
+        <id column="uid" property="uid" />
+        <result column="email" property="email" />
+        <result column="username" property="username" />
+        <result column="password" property="password" />
+        <result column="salt" property="salt" />
+        <result column="name" property="name" />
+        <result column="phone" property="phone" />
+        <result column="avatar" property="avatar" />
+        <result column="money" property="money" />
+        <result column="freeze" property="freeze" />
+        <result column="spend" property="spend" />
+        <result column="score" property="score" />
+        <result column="experience" property="experience" />
+        <result column="adminid" property="adminid" />
+        <result column="groupid" property="groupid" />
+        <result column="levelid" property="levelid" />
+        <result column="overdue" property="overdue" />
+        <result column="regip" property="regip" />
+        <result column="regtime" property="regtime" />
+        <result column="randcode" property="randcode" />
+        <result column="ismobile" property="ismobile" />
+        <result column="old_id" property="oldId" />
+        <result column="system_type" property="systemType" />
+        <result column="parent_id" property="parentId" />
+        <result column="path" property="path" />
+        <result column="active" property="active" />
+        <result column="active_time" property="activeTime" />
+        <result column="invite_num" property="inviteNum" />
+        <result column="token" property="token" />
+        <result column="jpush" property="jpush" />
+        <result column="isrocket" property="isrocket" />
+        <result column="l_status" property="lStatus" />
+        <result column="san" property="san" />
+    </resultMap>
+
+    <resultMap id="BaseMap" type="com.xinlian.common.response.QueryAddress">
+        <result column="uid" property="uid"/>
+        <result column="username" property="username"/>
+        <result column="faddress" property="faddress"/>
+    </resultMap>
+
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        uid, email, username, password, salt, name, phone, avatar, money, freeze, spend, score, experience, adminid, groupid, levelid, overdue, regip, regtime, randcode, ismobile, old_id, system_type, parent_id, path, active, active_time, invite_num, token, jpush, isrocket, l_status, san
+    </sql>
+
+
+    <select id="searchAddress" resultMap="BaseMap">
+        select a.uid, a.username,b.faddress from  oldData_dr_member as a
+        LEFT JOIN oldData_dr_member_wallet_virtuar_address  as b
+        on a.uid=b.fuid
+        <where>
+            <if test="uid !=null and uid !=0">
+            and a.uid =#{uid}
+            </if>
+            <if test="faddress !=null and faddress !=''">
+            and b.faddress=#{faddress}
+            </if>
+            <if test="username !=null and username !=''">
+                and a.username=#{username}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

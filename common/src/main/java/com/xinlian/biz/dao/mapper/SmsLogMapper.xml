@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.SmsLogMapper">
+
+
+
+    <insert id="threadSaveSmsLog" parameterType="com.xinlian.biz.model.SmsLogModel">
+        insert into t_chuanglan_sms_log
+        (sender,acceptor_phone,sms_code,send_result,sms_redis_key,uid,createtime)
+        values
+        (#{sender},#{acceptorPhone},#{smsCode},#{sendResult},#{smsRedisKey},#{uid},CURRENT_TIMESTAMP)
+    </insert>
+
+    <insert id="threadCheckErrorSmsLog" parameterType="com.xinlian.biz.model.CheckErrorSmsModel">
+        insert into t_check_error_sms_log
+        (redis_sms_code,req_code,sms_redis_key,phone,country_code,createtime)
+        values
+        (#{redisSmsCode},#{reqCode},#{smsRedisKey},#{phone},#{countryCode},CURRENT_TIMESTAMP)
+    </insert>
+</mapper>

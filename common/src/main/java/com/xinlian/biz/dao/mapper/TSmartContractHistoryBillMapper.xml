@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TSmartContractHistoryBillMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TSmartContractHistoryBill">
+        <id column="id" property="id" />
+        <result column="bill_date" property="billDate" />
+        <result column="seller_initial_out_amount" property="sellerInitialOutAmount" />
+        <result column="seller_initial_in_amount" property="sellerInitialInAmount" />
+        <result column="buyer_initial_out_amount" property="buyerInitialOutAmount" />
+        <result column="buyer_initial_in_amount" property="buyerInitialInAmount" />
+        <result column="seller_today_out_amount" property="sellerTodayOutAmount" />
+        <result column="seller_today_in_amount" property="sellerTodayInAmount" />
+        <result column="buyer_today_out_amount" property="buyerTodayOutAmount" />
+        <result column="buyer_today_in_amount" property="buyerTodayInAmount" />
+        <result column="seller_end_out_amount" property="sellerEndOutAmount" />
+        <result column="seller_end_in_amount" property="sellerEndInAmount" />
+        <result column="buyer_end_out_amount" property="buyerEndOutAmount" />
+        <result column="buyer_end_in_amount" property="buyerEndInAmount" />
+        <result column="bill_status" property="billStatus" />
+        <result column="cat_outIn_diff_amount"   property="catOutInDiffAmount"/>
+        <result column="usdt_outIn_diff_amount"   property="usdtOutInDiffAmount"/>
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id AS id, bill_date AS billDate, seller_initial_out_amount AS sellerInitialOutAmount, seller_initial_in_amount AS sellerInitialInAmount,
+        buyer_initial_out_amount AS buyerInitialOutAmount, buyer_initial_in_amount AS buyerInitialInAmount, seller_today_out_amount AS sellerTodayOutAmount,
+        seller_today_in_amount AS sellerTodayInAmount, buyer_today_out_amount AS buyerTodayOutAmount, buyer_today_in_amount AS buyerTodayInAmount,
+        seller_end_out_amount AS sellerEndOutAmount, seller_end_in_amount AS sellerEndInAmount, buyer_end_out_amount AS buyerEndOutAmount, buyer_end_in_amount AS buyerEndInAmount,
+        bill_status AS billStatus, cat_outIn_diff_amount as catOutInDiffAmount, usdt_outIn_diff_amount as usdtOutInDiffAmount,create_time AS createTime
+    </sql>
+
+
+    <select id="findHistoryBillPage" resultType="com.xinlian.biz.model.TSmartContractHistoryBill">
+        select <include refid="Base_Column_List"/> from t_smart_contract_history_bill
+        <where>
+            1=1
+            <if test="startBillDate != null and startBillDate != '' and endBillDate != null and endBillDate != ''">
+                and bill_date between #{startBillDate} and #{endBillDate}
+            </if>
+            <if test="billStatus != null">
+                and bill_status = #{billStatus}
+            </if>
+        </where>
+        order by bill_date desc
+    </select>
+
+    <select id="findSellerBuyerTotalAmount" resultType="com.xinlian.common.dto.SmartContractTotalDto">
+        select sum(seller_today_out_amount) as sellerTotalOutAmount, sum(seller_today_in_amount) as sellerTotalInAmount,
+               sum(buyer_today_out_amount) as buyerTotalOutAmount,sum(buyer_today_in_amount) as buyerTotalInAmount
+        from t_smart_contract_history_bill where bill_date &lt; #{today}
+    </select>
+
+    <select id="getByBillDate" resultType="com.xinlian.biz.model.TSmartContractHistoryBill">
+        select <include refid="Base_Column_List"/> from t_smart_contract_history_bill
+        where bill_date = #{billDate}
+    </select>
+
+    <select id="statisticsSmartContractHistBill"  resultType="com.xinlian.common.response.SmartContractHisBillResponse">
+        select
+        <if test="dimensionsType=='DAY'">
+            FORMAT(ifnull(seller_today_in_amount/buyer_today_in_amount,0),4) as usdtPrice,
+            DATE_FORMAT(bill_date,'%m-%d') as dateStr
+        </if>
+        <if test="dimensionsType=='WEEK'">
+            FORMAT(ifnull(sum(seller_today_in_amount)/sum(buyer_today_in_amount),0),4) as usdtPrice,
+            CONCAT('第',WEEK(date_add(bill_date , interval -1 day)),'周') as dateStr
+        </if>
+        from t_smart_contract_history_bill
+        <if test="dimensionsType=='WEEK'">
+            GROUP BY WEEK(date_add(bill_date , interval -1 day))
+        </if>
+    </select>
+
+</mapper>

@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.AccountCheckMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.AccountCheckModel">
+        <id column="id" property="id" />
+        <result column="reconcile_date" property="reconcileDate" />
+        <result column="currency_id" property="currencyId" />
+        <result column="currency_code" property="currencyCode" />
+        <result column="server_node_id" property="serverNodeId" />
+        <result column="server_node_name" property="serverNodeName" />
+        <result column="current_total_currency_num" property="currentTotalCurrencyNum" />
+        <result column="off_site_recharge_num" property="offSiteRechargeNum" />
+        <result column="off_site_withdraw" property="offSiteWithdraw" />
+        <result column="from_rocket_num" property="fromRocketNum" />
+        <result column="to_rocket_num" property="toRocketNum" />
+        <result column="other_recorded" property="otherRecorded" />
+        <result column="other_charge_off" property="otherChargeOff" />
+        <result column="clearing_datetime" property="clearingDatetime" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <resultMap id="CollectMap" type="com.xinlian.common.response.TopNodeTradeDataResponse">
+        <id column="id" property="id" />
+        <result column="reconcile_date" property="reconcileDate" />
+        <result column="currency_id" property="currencyId" />
+        <result column="currency_code" property="currencyCode" />
+        <result column="server_node_id" property="serverNodeId" />
+        <result column="server_node_name" property="serverNodeName" />
+        <result column="current_total_currency_num" property="currentTotalCurrencyNum" />
+        <result column="off_site_recharge_num" property="offSiteRechargeNum" />
+        <result column="off_site_withdraw" property="offSiteWithdraw" />
+        <result column="from_rocket_num" property="fromRocketNum" />
+        <result column="to_rocket_num" property="toRocketNum" />
+        <result column="other_recorded" property="otherRecorded" />
+        <result column="other_charge_off" property="otherChargeOff" />
+        <result column="clearing_datetime" property="clearingDatetime" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, reconcile_date, currency_id, currency_code, server_node_id, server_node_name, current_total_currency_num, off_site_recharge_num, off_site_withdraw, from_rocket_num, to_rocket_num, other_recorded, other_charge_off, clearing_datetime, create_time
+    </sql>
+
+    <select id="query" resultMap="BaseResultMap" parameterType="com.xinlian.biz.model.AccountCheckModel">
+        select <include refid="Base_Column_List"/>
+        from t_account_check
+        <where>
+            <if test="serverNodeId!=null">
+                and server_node_id  = #{serverNodeId}
+            </if>
+            <if test="currencyCode!=null">
+                and currency_code  = #{currencyCode}
+            </if>
+            <if test="reconcileDateStartDate!=null and reconcileDateStartDate!=''">
+                and clearing_datetime &gt;= DATE_FORMAT(#{reconcileDateStartDate}, '%Y-%m-%d')
+            </if>
+            <if test="reconcileDateEndDate!=null and reconcileDateEndDate!=''">
+                and clearing_datetime &lt;= DATE_FORMAT(#{reconcileDateEndDate}, '%Y-%m-%d')
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+
+    <select id="queryStaySummary" resultMap="CollectMap" parameterType="java.lang.String">
+        select node.parent_id as parendId, node.parent_ids as parendIds ,
+        accountCheck.*
+        from t_account_check accountCheck
+        left join t_server_node node
+        on accountCheck.server_node_id = node.id
+        where reconcile_date = #{clearDay}
+    </select>
+
+    <select id="getTotalByCurrency" resultMap="BaseResultMap">
+        select
+        sum(balance_num+frozen_num) as current_total_currency_num,
+        currency_id ,
+        currency_code  from t_wallet_info GROUP BY currency_id
+    </select>
+
+    <insert id="staticWalletInfo" parameterType="java.lang.String">
+        insert into t_account_check (reconcile_date,current_total_currency_num,currency_id,currency_code,server_node_id,server_node_name,
+        clearing_datetime,create_time)
+        select #{clearDay} as reconcile_date,
+        sum(balance_num+frozen_num),
+        winfo.currency_id,
+        winfo.currency_code,
+        uinfo.server_node_id,
+        uinfo.server_node_name,
+        #{clearDay},
+        CURRENT_TIMESTAMP
+        from t_user_info uinfo
+        left join t_wallet_info winfo on uinfo.uid = winfo.uid
+        where winfo.currency_code in ('USDT','CAT','GPT','CAG')
+        and uinfo.server_node_id>0
+        GROUP BY uinfo.server_node_id, winfo.currency_id
+        UNION
+        select #{clearDay} as reconcile_date,
+        sum(balance_num+frozen_num),
+        winfo.currency_id,
+        winfo.currency_code,
+        0,
+        '全部',
+        #{clearDay},
+        CURRENT_TIMESTAMP
+        from t_user_info uinfo
+        left join t_wallet_info winfo on uinfo.uid = winfo.uid
+        where winfo.currency_code in ('USDT','CAT','GPT','CAG')
+        and uinfo.server_node_id > 0
+        GROUP BY winfo.currency_id
+    </insert>
+
+    <!--统计交易数据-->
+    <select id="staticTradeOrderTradeNum" resultType="com.xinlian.biz.model.StatisticsTradeOrderModel" parameterType="com.xinlian.biz.model.AccountCheckModel">
+        SELECT
+        DATE_FORMAT( torder.create_time, '%Y%m%d' ) AS reconcileDate,
+        sum( trade_currency_num ) as statisticsNumber,
+        <if test="des != null">
+            #{des} as statisticsType,
+        </if>
+        <if test="des ==null and otherStatistics!=null and tradeType == 1">
+            '其他入账' as statisticsType,
+        </if>
+        <if test="des ==null and otherStatistics!=null and tradeType == 2">
+            '其他出账' as statisticsType,
+        </if>
+        uinfo.server_node_id as serverNodeId,uinfo.server_node_name as serverNodeName,
+        torder.currency_code as currencyCode,torder.currency_id as currencyId
+        FROM
+        t_wallet_trade_order torder
+        left join t_user_info uinfo on torder.uid = uinfo.uid
+        <where>
+            and uinfo.server_node_id > 0
+            and trade_status = 7
+            <if test="tradeType != null">
+                and trade_type = #{tradeType}
+            </if>
+            <if test="des != null">
+                and des = #{des}
+            </if>
+            <if test="otherStatistics!=null">
+                and des not in
+                <foreach collection="otherStatistics" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="staticsDate!=null">
+                and DATE_FORMAT( torder.create_time, '%Y-%m-%d' ) = DATE_FORMAT(#{staticsDate}, '%Y-%m-%d' )
+            </if>
+        </where>
+        GROUP BY
+        uinfo.server_node_id,
+        torder.currency_id
+        <if test="staticsDate==null">
+            ,TO_DAYS( torder.create_time )
+        </if>
+        union
+        SELECT
+        DATE_FORMAT( torder.create_time, '%Y%m%d' ) AS reconcileDate,
+        sum( trade_currency_num ) as statisticsNumber,
+        <if test="des != null">
+            #{des} as statisticsType,
+        </if>
+        <if test=" des == null and otherStatistics!=null and tradeType == 1">
+            '其他入账' as statisticsType,
+        </if>
+        <if test="des == null and otherStatistics!=null and tradeType == 2">
+            '其他出账' as statisticsType,
+        </if>
+        0 as serverNodeId,'全部' as serverNodeName,
+        torder.currency_code as currencyCode,torder.currency_id as currencyId
+        FROM
+        t_wallet_trade_order torder
+        left join t_user_info uinfo on torder.uid = uinfo.uid
+        <where>
+            and uinfo.server_node_id > 0
+            and trade_status = 7
+            <if test="tradeType != null">
+                and trade_type = #{tradeType}
+            </if>
+            <if test="des != null">
+                and des = #{des}
+            </if>
+            <if test="otherStatistics!=null">
+                and des not in
+                <foreach collection="otherStatistics" item="item" separator="," open="(" close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="staticsDate!=null">
+                and DATE_FORMAT( torder.create_time, '%Y-%m-%d' ) = DATE_FORMAT(#{staticsDate}, '%Y-%m-%d' )
+            </if>
+        </where>
+        GROUP BY
+        torder.currency_id
+        <if test="staticsDate==null">
+            ,TO_DAYS( torder.create_time )
+        </if>
+    </select>
+
+    <insert id="createStaticTask" parameterType="java.lang.String">
+        insert into t_static_task (static_task_name,static_date,create_time) value (#{staticTaskName},#{staticDate},CURRENT_TIMESTAMP)
+    </insert>
+
+    <update id="batchUpdate" parameterType="com.xinlian.biz.model.StatisticsTradeOrderModel">
+        <foreach collection="list" item="record" separator=";" open="" close="">
+            update t_account_check
+            <set>
+                <if test="record.statisticsType == '链上充值'">
+                    off_site_recharge_num = #{record.statisticsNumber},
+                </if>
+                <if test="record.statisticsType=='提币'">
+                    off_site_withdraw = #{record.statisticsNumber},
+                </if>
+                <if test="record.statisticsType=='rocket转入'">
+                    from_rocket_num = #{record.statisticsNumber},
+                </if>
+                <if test=" record.statisticsType == '转出到rocket'">
+                    to_rocket_num = #{record.statisticsNumber},
+                </if>
+                <if test=" record.statisticsType=='其他入账'">
+                    other_recorded = #{record.statisticsNumber},
+                </if>
+                <if test="record.statisticsType=='其他出账'">
+                    other_charge_off = #{record.statisticsNumber},
+                </if>
+            </set>
+            <where>
+                <if test="record.serverNodeId!=null">
+                    and server_node_id = #{record.serverNodeId}
+                </if>
+                <if test="record.currencyCode !=null and record.currencyCode!=''">
+                    and currency_code = #{record.currencyCode}
+                </if>
+                <if test="record.reconcileDate!=null and record.reconcileDate!=''">
+                    and reconcile_date = #{record.reconcileDate}
+                </if>
+            </where>
+        </foreach>
+    </update>
+</mapper>

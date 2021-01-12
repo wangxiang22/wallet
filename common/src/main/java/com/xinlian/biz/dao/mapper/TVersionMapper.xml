@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TVersionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TVersion">
+        <id column="id" property="id" />
+        <result column="versionId" property="versionId" />
+        <result column="addr" property="addr" />
+        <result column="createdTime" property="createdTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, versionId AS versionId, addr, createdTime AS createdTime
+    </sql>
+
+    <select id="queryOne" resultMap="BaseResultMap">
+        select * from t_version order by createdTime DESC limit 1
+    </select>
+
+</mapper>

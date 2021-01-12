@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.AdProofDiagramMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.AdProofDiagramModel">
+        <id column="id" property="id" />
+        <result column="ad_title" property="adTitle" />
+        <result column="image_url" property="imageUrl" />
+        <result column="submap_url" property="submapUrl" />
+        <result column="background_url" property="backgroundUrl" />
+        <result column="jump_to_url" property="jumpToUrl" />
+        <result column="percent" property="percent" />
+        <result column="status" property="status" />
+        <result column="cratetime" property="cratetime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, ad_title, image_url, submap_url, background_url, jump_to_url, percent, status, cratetime
+    </sql>
+
+
+    <select id="getRandomOneAd" resultMap="BaseResultMap">
+        SELECT t1.* FROM t_ad_proof_diagram AS t1 JOIN (SELECT ROUND(RAND()*(SELECT MAX(id)
+        FROM t_ad_proof_diagram)) AS id) AS t2 WHERE t1.id>=t2.id ORDER BY t1.id LIMIT 1
+    </select>
+
+</mapper>

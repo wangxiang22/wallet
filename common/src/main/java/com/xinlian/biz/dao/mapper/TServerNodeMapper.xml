@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xinlian.biz.dao.TServerNodeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.xinlian.biz.model.TServerNode">
+        <id column="id" property="id" />
+        <result column="parent_id" property="parentId" />
+        <result column="parent_ids" property="parentIds" />
+        <result column="name" property="name" />
+        <result column="nickname" property="nickname" />
+        <result column="logo_url" property="logoUrl" />
+        <result column="child_status" property="childStatus" />
+        <result column="hidden_status" property="hiddenStatus" />
+        <result column="child_ids" property="childIds" />
+        <result column="display_order" property="displayOrder" />
+        <result column="active_require_money" property="activeRequireMoney" />
+        <result column="register_status" property="registerStatus" />
+        <result column="login_status" property="loginStatus" />
+        <result column="active_status" property="activeStatus" />
+        <result column="pledge_status" property="pledgeStatus" />
+        <result column="smart_contracts_status" property="smartContractsStatus" />
+        <result column="change_node_status" property="changeNodeStatus" />
+        <result column="auth_status" property="authStatus" />
+        <result column="invite_status" property="inviteStatus" />
+        <result column="withdraw_status" property="withdrawStatus" />
+        <result column="different_node_invite" property="differentNodeInvite" />
+        <result column="mobile_register_amount" property="mobileRegisterAmount" />
+        <result column="auth_register_amount" property="authRegisterAmount" />
+        <result column="email_bind_amount" property="emailBindAmount" />
+        <result column="transfer_CAT_status" property="transferCatStatus" />
+        <result column="transfer_USDT_status" property="transferUsdtStatus" />
+        <result column="transfer_CAG_status" property="transferCagStatus" />
+        <result column="recharge_CAT_status" property="rechargeCatStatus" />
+        <result column="recharge_USDT_status" property="rechargeUsdtStatus" />
+        <result column="recharge_CAG_status" property="rechargeCagStatus" />
+        <result column="cash_CAT_status" property="cashCatStatus" />
+        <result column="cash_USDT_status" property="cashUsdtStatus" />
+        <result column="cash_CAG_status" property="cashCagStatus" />
+        <result column="bind_rocket_status" property="bindRocketStatus" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, parent_id, parent_ids, name, nickname, logo_url, child_status, hidden_status, child_ids, display_order,
+        active_require_money, register_status, login_status, active_status, pledge_status, smart_contracts_status, change_node_status, auth_status, invite_status,
+        withdraw_status, different_node_invite, mobile_register_amount, auth_register_amount, email_bind_amount, transfer_CAT_status AS transferCatStatus,
+        transfer_USDT_status AS transferUsdtStatus, transfer_CAG_status AS transferCagStatus, recharge_CAT_status AS rechargeCatStatus,
+        recharge_USDT_status AS rechargeUsdtStatus, recharge_CAG_status AS rechargeCagStatus, cash_CAT_status AS cashCatStatus,
+        cash_USDT_status AS cashUsdtStatus, cash_CAG_status AS cashCagStatus, bind_rocket_status, create_time, update_time
+    </sql>
+    <sql id="join_column_list">
+        parent_id, parent_ids, name, nickname, logo_url, child_status, hidden_status, child_ids, display_order,
+        active_require_money, register_status, login_status, active_status, change_node_status, auth_status, invite_status,
+        withdraw_status, different_node_invite, mobile_register_amount, auth_register_amount, email_bind_amount, transfer_CAT_status,
+        transfer_USDT_status , transfer_CAG_status, recharge_CAT_status, recharge_USDT_status, recharge_CAG_status, cash_CAT_status,
+        cash_USDT_status, cash_CAG_status, bind_rocket_status, create_time, update_time
+    </sql>
+    <select id="getServerNodeByWithdrawAddress" resultMap="BaseResultMap" parameterType="com.xinlian.biz.model.TWalletInfo">
+        SELECT
+        serverNode.id
+        FROM
+        t_server_node serverNode
+        left join t_user_info useri on useri.server_node_id = serverNode.id
+        left JOIN t_wallet_info walletInfo on walletInfo.uid = useri.uid
+        <where>
+            <if  test="currencyAddress!=null and currencyAddress!=''">
+                and walletInfo.currency_address = #{currencyAddress}
+            </if>
+            <if  test="currencyId!=null">
+                and walletInfo.currency_id = #{currencyId}
+            </if>
+        </where>
+    </select>
+
+    <select id="getServerNodeByWalletInfoUid" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select serverNode.id ,<include refid="join_column_list"/>
+        from t_wallet_info walletInfo
+        left join t_server_node serverNode on walletInfo.server_node_id = serverNode.id
+        where walletInfo.uid = #{uid}
+        LIMIT 1
+    </select>
+</mapper>
